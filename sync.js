@@ -5,11 +5,18 @@ function encodeEmail(email) {
 
 const originalSetItem = localStorage.setItem.bind(localStorage);
 const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings'];
+const firebaseSyncedKeys = new Set(); // Track which keys have finished initial sync
 
 localStorage.setItem = function (key, value) {
     originalSetItem(key, value);
 
     if (SYNC_KEYS.includes(key)) {
+        // ONLY push to Firebase if we have completed the initial fetch for this key!
+        // This prevents local empty state initialization (like []) from overwriting remote data on login.
+        if (!firebaseSyncedKeys.has(key)) {
+            return; 
+        }
+        
         const email = localStorage.getItem('cardbills_logged_in_user_email');
         if (email && window.firebaseDB) {
             const encodedEmail = encodeEmail(email);
@@ -75,6 +82,8 @@ function startSync() {
             }
 
             // Mark as synced so we know future nulls are deletions
+            // And add to our Set so future localStorage.setItems will trigger Firebase uploads
+            firebaseSyncedKeys.add(key);
             localStorage.setItem('cardbills_firebase_synced_' + key, 'true');
             // Notify the app that data has been synced
             window.dispatchEvent(new CustomEvent('data-synced', { detail: key }));
