@@ -216,7 +216,7 @@ window.savePdfSettings = () => {
   
   // Also push to firebase if sync is active
   if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-    const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\\./g, '_').replace(/@/g, '_at_');
+    const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
     window.firebaseDB.write('users/' + encodedEmail + '/cardbills_pdf_settings', settings).catch(e=>{});
   }
 
@@ -273,3 +273,10 @@ window.clearPdfImage = (previewId, placeholderId, inputId) => {
 
 fs.writeFileSync('script.js', js);
 console.log('Successfully patched index.html and script.js for PDF Settings');
+
+// Listen for realtime sync updates from sync.js
+window.addEventListener('data-synced', (e) => {
+  if (e.detail === 'cardbills_pdf_settings') {
+    window.loadPdfSettings();
+  }
+});
