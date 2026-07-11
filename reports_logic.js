@@ -114,6 +114,13 @@
             let amt = parseFloat(d.amount) || 0;
             let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
             chargesRecv += cFee; 
+            
+            let status = (d.chargesStatus || '').toLowerCase();
+            if (status === 'fully paid' || status === 'settled') {
+               chargesPay += cFee;
+            } else if (status === 'partially paid' && d.paidAmount) {
+               chargesPay += parseFloat(d.paidAmount) || 0;
+            }
           });
         }
       });
