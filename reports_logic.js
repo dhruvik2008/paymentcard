@@ -1058,74 +1058,24 @@ function renderCbViewTable() {
     });
 
     if (pdfTableBody.children.length === 0) {
-      pdfTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 12px; color: #6b7280;">No charges details available.</td></tr>';
+      pdfTableBody.closest('table').style.display = 'none';
+      pdfTableBody.closest('table').previousElementSibling.style.display = 'none';
+    } else {
+      pdfTableBody.closest('table').style.display = 'table';
+      pdfTableBody.closest('table').previousElementSibling.style.display = 'block';
     }
 
-    // Populate Bills - To Receive Table
+    // The Bills - To Receive and Bills - To Pay tables have been removed as per user request.
     const pdfReceiveTableBody = document.getElementById('pdfReceiveTableBody');
-    pdfReceiveTableBody.innerHTML = '';
-    const receiveTxs = custTxs.filter(t => (parseFloat(t.raw.billTotal) || 0) > 0);
-    receiveTxs.forEach(t => {
-      const billAmt = parseFloat(t.raw.billTotal) || 0;
-      const paidAmt = t.raw.payments ? t.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-      const debitedAmt = t.raw.debits ? t.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-      const pendingAmt = Math.max(0, billAmt - paidAmt);
-      
-      let cardStr = 'Unknown';
-      if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
-        let cardObj = cust.cards[t.raw.cardIndex];
-        cardStr = `${cardObj.bank || 'Card'} **${cardObj.last}`;
-      }
-      const dateStr = new Date(t.date).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: '2-digit'});
-
-      const tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid #fef3c7';
-      tr.innerHTML = `
-        <td style="padding: 8px 6px; border: 1px solid #fef3c7;">${dateStr}</td>
-        <td style="padding: 8px 6px; border: 1px solid #fef3c7;">${cardStr}</td>
-        <td style="padding: 8px 6px; border: 1px solid #fef3c7; text-align: right; white-space: nowrap;">${fmt(paidAmt)}</td>
-        <td style="padding: 8px 6px; border: 1px solid #fef3c7; text-align: right; white-space: nowrap;">${fmt(debitedAmt)}</td>
-        <td style="padding: 8px 6px; border: 1px solid #fef3c7; text-align: right; white-space: nowrap;">${fmt(pendingAmt)}</td>
-      `;
-      pdfReceiveTableBody.appendChild(tr);
-    });
-    if (pdfReceiveTableBody.children.length === 0) {
-      pdfReceiveTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 12px; color: #6b7280;">No entries.</td></tr>';
+    if (pdfReceiveTableBody) {
+        pdfReceiveTableBody.closest('table').style.display = 'none';
+        pdfReceiveTableBody.closest('table').previousElementSibling.style.display = 'none';
     }
 
-    // Populate Bills - To Pay Table
     const pdfPayTableBody = document.getElementById('pdfPayTableBody');
-    pdfPayTableBody.innerHTML = '';
-    const payTxs = custTxs.filter(t => {
-      const paidAmt = t.raw.payments ? t.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-      const debitedAmt = t.raw.debits ? t.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-      return paidAmt > 0 || debitedAmt > 0;
-    });
-    payTxs.forEach(t => {
-      const paidAmt = t.raw.payments ? t.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-      const debitedAmt = t.raw.debits ? t.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-      const owedAmt = Math.max(0, debitedAmt - paidAmt);
-      
-      let cardStr = 'Unknown';
-      if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
-        let cardObj = cust.cards[t.raw.cardIndex];
-        cardStr = `${cardObj.bank || 'Card'} **${cardObj.last}`;
-      }
-      const dateStr = new Date(t.date).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: '2-digit'});
-
-      const tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid #bfdbfe';
-      tr.innerHTML = `
-        <td style="padding: 8px 6px; border: 1px solid #bfdbfe;">${dateStr}</td>
-        <td style="padding: 8px 6px; border: 1px solid #bfdbfe;">${cardStr}</td>
-        <td style="padding: 8px 6px; border: 1px solid #bfdbfe; text-align: right; white-space: nowrap;">${fmt(paidAmt)}</td>
-        <td style="padding: 8px 6px; border: 1px solid #bfdbfe; text-align: right; white-space: nowrap;">${fmt(debitedAmt)}</td>
-        <td style="padding: 8px 6px; border: 1px solid #bfdbfe; text-align: right; white-space: nowrap;">${fmt(owedAmt)}</td>
-      `;
-      pdfPayTableBody.appendChild(tr);
-    });
-    if (pdfPayTableBody.children.length === 0) {
-      pdfPayTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 12px; color: #6b7280;">No entries.</td></tr>';
+    if (pdfPayTableBody) {
+        pdfPayTableBody.closest('table').style.display = 'none';
+        pdfPayTableBody.closest('table').previousElementSibling.style.display = 'none';
     }
 
     const element = document.getElementById('pdfTemplate');
