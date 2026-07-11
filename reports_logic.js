@@ -350,6 +350,47 @@
          amount -= payAmt;
        }
        
+       // Now pay off pending charges with the remaining amount
+       if (amount > 0) {
+         let pendingCharges = [];
+         txs.forEach((t, i) => {
+           if (t.raw && t.raw.custIndex == origCustIndex && t.raw.debits) {
+             t.raw.debits.forEach((d, dIdx) => {
+               let status = (d.chargesStatus || '').toLowerCase();
+               if (status === 'pending' || status === 'partially paid') {
+                 let cFee = parseFloat(d.charges) || ((parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100);
+                 let paid = parseFloat(d.paidAmount) || 0;
+                 let owe = cFee - paid;
+                 if (owe > 0) {
+                   pendingCharges.push({ txIndex: i, dIdx: dIdx, owe: owe, fee: cFee, paid: paid });
+                 }
+               }
+             });
+           }
+         });
+         
+         pendingCharges.sort((a,b) => new Date(txs[a.txIndex].date) - new Date(txs[b.txIndex].date));
+         
+         for (let pc of pendingCharges) {
+           if (amount <= 0) break;
+           let payAmt = Math.min(amount, pc.owe);
+           if (payAmt <= 0) continue;
+           
+           let d = txs[pc.txIndex].raw.debits[pc.dIdx];
+           let newPaid = pc.paid + payAmt;
+           
+           if (newPaid >= pc.fee - 0.01) {
+             d.chargesStatus = 'Fully Paid';
+             d.paidAmount = pc.fee;
+           } else {
+             d.chargesStatus = 'Partially Paid';
+             d.paidAmount = newPaid;
+           }
+           
+           amount -= payAmt;
+         }
+       }
+       
        if (amount > 0.01) {
          ledger.push({
            id: 'L' + Date.now(),
