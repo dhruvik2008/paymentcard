@@ -93,6 +93,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDashboard();
     renderCustomers();
 
+    // Allow 'Enter' key to move to the next input field for better mobile/keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT')) {
+                if (active.id === 'searchInput' || active.id === 'transactionSearchInput') return;
+                let container = active.closest('.modal') || active.closest('.page-section') || document.body;
+                const focusable = Array.from(container.querySelectorAll('input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled])')).filter(el => {
+                    return el.offsetWidth > 0 || el.offsetHeight > 0 || el === active;
+                });
+                const idx = focusable.indexOf(active);
+                if (idx > -1 && idx < focusable.length - 1) {
+                    e.preventDefault();
+                    focusable[idx + 1].focus();
+                } else if (idx === focusable.length - 1) {
+                    active.blur();
+                    const primaryBtn = container.querySelector('#wizardNextBtn, #saveBtn, .btn-primary');
+                    if (primaryBtn && primaryBtn.offsetParent !== null) {
+                        primaryBtn.click();
+                    }
+                }
+            }
+        }
+    });
+
     // Open Drawer
     const openDrawer = () => {
         editingCustomerIndex = -1;
