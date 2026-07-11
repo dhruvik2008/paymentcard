@@ -1569,7 +1569,6 @@ input:checked + .toggle-slider.round::before {
 }
 
 svg[viewBox="0 0 100 100"] {
-  animation: spinGlow 3s infinite ease-in-out;
   transform-origin: center;
 }
 
