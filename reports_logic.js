@@ -125,15 +125,47 @@
         if ((l.subUser && l.subUser.trim().toLowerCase() === c.name.trim().toLowerCase()) || (l.description && l.description.toLowerCase().includes(c.name.trim().toLowerCase()))) {
           let lAmt = parseFloat(l.amount) || 0;
           const typeLower = l.type?.toLowerCase();
-          if (typeLower === 'expense' || typeLower === 'bank_transfer') {
-            ledgerPay += lAmt;
-          } else if (typeLower === 'income' || typeLower === 'cash') {
+          if (typeLower === 'expense' || typeLower === 'cash given' || typeLower === 'bank transfer sent') {
             ledgerRecv += lAmt;
+          } else if (typeLower === 'income' || typeLower === 'cash received' || typeLower === 'bank transfer received') {
+            ledgerPay += lAmt;
           }
         }
       });
       
+      let currentCharges = chargesRecv - chargesPay;
+      let currentBills = billsRecv - billsPay;
       let ledgerNet = ledgerRecv - ledgerPay;
+
+      // Auto-offset negative bills against positive charges
+      if (currentBills < 0 && currentCharges > 0) {
+         let deduct = Math.min(currentCharges, Math.abs(currentBills));
+         currentCharges -= deduct;
+         currentBills += deduct;
+         chargesPay += deduct;
+         billsPay -= deduct;
+      }
+
+      // Auto-offset overpayments (negative ledger) against pending charges and bills
+      if (ledgerNet < 0) {
+        let available = Math.abs(ledgerNet);
+        if (currentCharges > 0) {
+           let deduct = Math.min(currentCharges, available);
+           currentCharges -= deduct;
+           available -= deduct;
+           chargesPay += deduct;
+           ledgerPay -= deduct;
+        }
+        if (currentBills > 0 && available > 0) {
+           let deduct = Math.min(currentBills, available);
+           currentBills -= deduct;
+           available -= deduct;
+           billsPay += deduct;
+           ledgerPay -= deduct;
+        }
+        ledgerNet = -available;
+      }
+
       if (ledgerNet > 0) {
         ledgerRecv = ledgerNet; ledgerPay = 0;
       } else {
@@ -144,9 +176,9 @@
       const totPay = chargesPay + ledgerPay + billsPay;
       const netCollect = totRecv - totPay;
 
-      totalChargesPending += (chargesRecv - chargesPay);
-      totalLedgerPending += (ledgerRecv - ledgerPay);
-      totalBillsPending += (billsRecv - billsPay);
+      totalChargesPending += currentCharges;
+      totalLedgerPending += ledgerNet;
+      totalBillsPending += currentBills;
 
       const initials = (c.name || 'U').substring(0, 2).toUpperCase();
       const card = document.createElement('div');
@@ -240,9 +272,9 @@
         }
         chargesRecv += txCharge;
         
-        let txTotalOwe = (parseFloat(t.raw.billTotal) || 0) + txCharge;
-        if (t.status !== 'Fully Debited') {
-          pendingTxs.push({index: i, tx: t, owe: txTotalOwe - txPay});
+        let oweOnBill = Math.max(0, (parseFloat(t.raw.billTotal) || 0) - txPay);
+        if (oweOnBill > 0) {
+          pendingTxs.push({index: i, tx: t, owe: oweOnBill});
         }
       }
     });
@@ -254,8 +286,8 @@
       if ((l.subUser && l.subUser.trim().toLowerCase() === customerName.trim().toLowerCase()) || (l.description && l.description.toLowerCase().includes(customerName.trim().toLowerCase()))) {
         let lAmt = parseFloat(l.amount) || 0;
         const typeLower = l.type?.toLowerCase();
-        if (typeLower === 'expense' || typeLower === 'bank_transfer') ledgerPay += lAmt;
-        else if (typeLower === 'income' || typeLower === 'cash') ledgerRecv += lAmt;
+        if (typeLower === 'expense' || typeLower === 'cash given' || typeLower === 'bank transfer sent') ledgerRecv += lAmt;
+        else if (typeLower === 'income' || typeLower === 'cash received' || typeLower === 'bank transfer received') ledgerPay += lAmt;
       }
     });
     
@@ -312,9 +344,9 @@
          ledger.push({
            id: 'L' + Date.now(),
            date: new Date().toISOString().split('T')[0],
-           type: 'income',
+           type: 'Income',
            amount: amount,
-           description: 'Advance / Overpayment from ' + customerName + ' (' + method + ')',
+           description: 'Settlement / Charges payment from ' + customerName + ' (' + method + ')',
            subUser: customerName
          });
          localStorage.setItem('cardbills_ledger_entries', JSON.stringify(ledger));
@@ -344,7 +376,7 @@
        ledger.push({
            id: 'L' + Date.now(),
            date: new Date().toISOString().split('T')[0],
-           type: 'expense',
+           type: 'Expense',
            amount: amount,
            description: 'Payment to ' + customerName + ' (' + method + ')',
            subUser: customerName
@@ -390,7 +422,7 @@
     txs.forEach(t => {
       const td = new Date(t.date);
       if (td >= sDate && td <= eDate) {
-        const dKey = t.date.split('T')[0];
+        const dKey = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
         if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0 };
         
         if (t.raw && t.raw.debits) {
@@ -411,7 +443,7 @@
     ledger.forEach(l => {
       const ld = new Date(l.date);
       if (ld >= sDate && ld <= eDate) {
-        const dKey = l.date;
+        const dKey = `${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
         if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0 };
         
         const typeLower = l.type?.toLowerCase();
@@ -543,10 +575,10 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
     if ((l.subUser && l.subUser.trim().toLowerCase() === customerName.trim().toLowerCase()) || (l.description && l.description.toLowerCase().includes(customerName.trim().toLowerCase()))) {
       let lAmt = parseFloat(l.amount) || 0;
       const typeLower = l.type?.toLowerCase();
-      if (typeLower === 'expense' || typeLower === 'bank_transfer') {
-        ledgerPay += lAmt;
-      } else if (typeLower === 'income' || typeLower === 'cash') {
+      if (typeLower === 'expense' || typeLower === 'cash given' || typeLower === 'bank transfer sent') {
         ledgerRecv += lAmt;
+      } else if (typeLower === 'income' || typeLower === 'cash received' || typeLower === 'bank transfer received') {
+        ledgerPay += lAmt;
       }
     }
   });
