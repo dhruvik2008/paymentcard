@@ -1,16 +1,3 @@
-// Temporary script to clear out bad settlement transactions
-(function () {
-  let txs = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
-  const originalLength = txs.length;
-  // Remove all settlement entries so the user can start fresh
-  txs = txs.filter(tx => !tx.isSettlement);
-
-  if (txs.length !== originalLength) {
-    localStorage.setItem('cardbills_transactions', JSON.stringify(txs));
-    console.log("Cleared old settlements.");
-  }
-})();
-
 document.addEventListener('DOMContentLoaded', () => {
 // Pagination Global State
 let currentTxPage = 1;
@@ -2163,20 +2150,33 @@ const ITEMS_PER_PAGE = 20;
         </div>
       </td>
       <td>
-        <span style="font-weight: 600; color: ${parseFloat(String(tx.pending || '0').replace(/[^0-9.-]/g, '')) > 0 ? '#f97316' : '#10b981'};">
-          ${typeof tx.pending === 'string' ? tx.pending : ('₹' + parseFloat(tx.pending || 0).toLocaleString('en-IN'))}
-        </span>
+        ${(() => {
+          const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
+          const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
+          const currentPending = Math.max(0, bAmt - pAmt);
+          return `<span style="font-weight: 600; color: ${currentPending > 0 ? '#f97316' : '#10b981'};">
+            ₹${currentPending.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </span>`;
+        })()}
       </td>
       <td>
         ${(() => {
-          const isPending = tx.status !== 'Fully Debited';
-          const bg = isPending ? '#fff7ed' : '#f0fdf4';
-          const color = isPending ? '#ea580c' : '#16a34a';
-          const border = isPending ? '#fed7aa' : '#bbf7d0';
-          const dot = isPending ? '#f97316' : '#22c55e';
+          const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
+          const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
+          const customerPending = Math.max(0, bAmt - pAmt);
+          
+          let currentStatus = customerPending <= 0 ? 'Fully Debited' : 'Pending';
+          
+          let bg, color, border, dot;
+          if (currentStatus === 'Fully Debited') {
+            bg = '#f0fdf4'; color = '#16a34a'; border = '#bbf7d0'; dot = '#22c55e';
+          } else {
+            bg = '#fff7ed'; color = '#ea580c'; border = '#fed7aa'; dot = '#f97316';
+          }
+          
           return `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:${bg};border:1px solid ${border};font-size:0.78rem;font-weight:600;color:${color};">
             <span style="width:7px;height:7px;border-radius:50%;background:${dot};display:inline-block;"></span>
-            ${tx.status}
+            ${currentStatus}
           </span>`;
         })()}
       </td>
@@ -3543,7 +3543,9 @@ const updateWeeklyChart = () => {
       let dayIndex = txDate.getDay() - 1;
       if (dayIndex === -1) dayIndex = 6;
 
-      const pendingVal = parseFloat(tx.pending.replace(/[^0-9.-]/g, '')) || 0;
+      if (tx.isSettlement) return;
+      const pendingStr = tx.pending || '0';
+      const pendingVal = parseFloat(pendingStr.replace(/[^0-9.-]/g, '')) || 0;
       if (pendingVal <= 0.01) {
         dailyPaid[dayIndex]++;
       } else {
@@ -3823,10 +3825,11 @@ const renderDashboard = () => {
   const todayDay = today.getDate();
 
   currentTxs.forEach(tx => {
-    if (!tx.raw) return;
+    if (!tx.raw || tx.isSettlement) return;
     const cust = currentCustomers[tx.raw.custIndex];
     const card = cust && cust.cards ? cust.cards[tx.raw.cardIndex] : null;
-    const pendingVal = parseFloat(tx.pending.replace(/[^0-9.-]/g, '')) || 0;
+    const pendingStr = tx.pending || '0';
+    const pendingVal = parseFloat(pendingStr.replace(/[^0-9.-]/g, '')) || 0;
 
     if (pendingVal <= 0.01) {
       paidCount++;
