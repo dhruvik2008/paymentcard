@@ -1914,7 +1914,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         if (ledgerPortalFilter.options.length <= 1) {
-            [...portalSet].sort().forEach(p => {
+            const allConfiguredPortals = (JSON.parse(localStorage.getItem('cardbills_portals')) || []).map(p => p.name);
+            [...new Set([...allConfiguredPortals, ...portalSet])].filter(Boolean).sort().forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p;
                 opt.textContent = p;
