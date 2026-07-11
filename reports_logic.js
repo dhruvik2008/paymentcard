@@ -112,7 +112,7 @@
         if (t.raw.debits) {
           t.raw.debits.forEach(d => {
             let amt = parseFloat(d.amount) || 0;
-            let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
+            let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
             chargesRecv += cFee; 
           });
         }
@@ -267,7 +267,7 @@
         let txCharge = 0;
         if (t.raw.debits) {
           t.raw.debits.forEach(d => {
-             txCharge += (parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100;
+             txCharge += parseFloat(d.charges) || ((parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100);
           });
         }
         chargesRecv += txCharge;
@@ -428,8 +428,8 @@
         if (t.raw && t.raw.debits) {
           t.raw.debits.forEach(d => {
             let amt = parseFloat(d.amount) || 0;
-            let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
-            let pChg = parseFloat(d.charges) || 0;
+            let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
+            let pChg = amt * (parseFloat(d.portalPercent) || 0) / 100;
             
             dailyData[dKey].cCharges += cFee;
             dailyData[dKey].pCharges += pChg;
@@ -562,7 +562,7 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
     if (t.raw.debits) {
       t.raw.debits.forEach(d => {
         let amt = parseFloat(d.amount) || 0;
-        let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
+        let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
         chargesRecv += cFee; 
       });
     }
@@ -683,7 +683,7 @@ function renderCbViewTable() {
       if (t.raw.debits && t.raw.debits.length > 0) {
         t.raw.debits.forEach(d => {
            let amt = parseFloat(d.amount) || 0;
-           let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
+           let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
            
            if (currentCbViewTab === 'charges' && cFee > 0) {
              rows.push({
@@ -823,8 +823,8 @@ function renderCbViewTable() {
         if (t.raw && t.raw.debits) {
           t.raw.debits.forEach(d => {
             let amt = parseFloat(d.amount) || 0;
-            let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
-            let pChg = parseFloat(d.charges) || 0;
+            let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
+            let pChg = amt * (parseFloat(d.portalPercent) || 0) / 100;
             let profit = cFee - pChg;
             
             dailyCustCharges += cFee;
@@ -919,7 +919,7 @@ function renderCbViewTable() {
       if (t.raw.debits) {
         t.raw.debits.forEach(d => {
           let amt = parseFloat(d.amount) || 0;
-          let cFee = amt * (parseFloat(d.ratePercent) || 0) / 100;
+          let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
           chargesRecv += cFee; 
         });
       }
