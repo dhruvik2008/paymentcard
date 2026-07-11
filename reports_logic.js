@@ -176,6 +176,9 @@
       const totPay = chargesPay + ledgerPay + billsPay;
       const netCollect = totRecv - totPay;
 
+      // Skip fully settled customers
+      if (Math.abs(netCollect) < 0.01) return;
+
       totalChargesPending += currentCharges;
       totalLedgerPending += ledgerNet;
       totalBillsPending += currentBills;
