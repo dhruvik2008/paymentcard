@@ -505,7 +505,7 @@
       const ld = new Date(l.date);
       if (ld >= sDate && ld <= eDate) {
         const dKey = `${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
-        if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0 };
+        if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0, extraProfit: 0 };
         
         const typeLower = l.type?.toLowerCase();
         if (typeLower === 'expense') {
@@ -516,8 +516,33 @@
       }
     });
 
+    const exps = JSON.parse(localStorage.getItem('cardbills_expenses') || '[]');
+    exps.forEach(exp => {
+      const ed = new Date(exp.date);
+      if (ed >= sDate && ed <= eDate) {
+        const dKey = `${ed.getFullYear()}-${String(ed.getMonth()+1).padStart(2,'0')}-${String(ed.getDate()).padStart(2,'0')}`;
+        if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0, extraProfit: 0 };
+        let amt = parseFloat(exp.amount) || 0;
+        dailyData[dKey].expenses += amt;
+        totExpenses += amt;
+      }
+    });
+
+    let totExtraProfit = 0;
+    const extraProfits = JSON.parse(localStorage.getItem('cardbills_extra_profit') || '[]');
+    extraProfits.forEach(ep => {
+      const epd = new Date(ep.date);
+      if (epd >= sDate && epd <= eDate) {
+        const dKey = `${epd.getFullYear()}-${String(epd.getMonth()+1).padStart(2,'0')}-${String(epd.getDate()).padStart(2,'0')}`;
+        if(!dailyData[dKey]) dailyData[dKey] = { cCharges: 0, pCharges: 0, expenses: 0, extraProfit: 0 };
+        let amt = parseFloat(ep.amount) || 0;
+        dailyData[dKey].extraProfit = (dailyData[dKey].extraProfit || 0) + amt;
+        totExtraProfit += amt;
+      }
+    });
+
     const chgProfit = totCustCharges - totPortalCharges;
-    const netProfit = chgProfit - totExpenses;
+    const netProfit = chgProfit - totExpenses + totExtraProfit;
 
     document.getElementById('npCustomerCharges').textContent = `₹${totCustCharges.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('npPortalCharges').textContent = `₹${totPortalCharges.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -541,7 +566,7 @@
       const data = dailyData[dateStr];
       const dp = data.cCharges - data.pCharges;
       const dex = data.expenses;
-      const dnet = dp - dex;
+      const dnet = dp - dex + (data.extraProfit || 0);
       
       const displayDate = new Date(dateStr).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
       
@@ -927,8 +952,23 @@ function renderCbViewTable() {
       }
     });
 
+    const exps = JSON.parse(localStorage.getItem('cardbills_expenses') || '[]');
+    exps.forEach(exp => {
+      if (exp.date === dateStr) {
+        dailyExpenses += parseFloat(exp.amount) || 0;
+      }
+    });
+
+    let dailyExtraProfit = 0;
+    const extraProfits = JSON.parse(localStorage.getItem('cardbills_extra_profit') || '[]');
+    extraProfits.forEach(ep => {
+      if (ep.date === dateStr) {
+        dailyExtraProfit += parseFloat(ep.amount) || 0;
+      }
+    });
+
     const dailyProfit = dailyCustCharges - dailyPortalCharges;
-    const dailyNet = dailyProfit - dailyExpenses;
+    const dailyNet = dailyProfit - dailyExpenses + dailyExtraProfit;
 
     document.getElementById('npDetailProfitCharges').textContent = '₹' + dailyProfit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('npDetailExpenses').textContent = '₹' + dailyExpenses.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
