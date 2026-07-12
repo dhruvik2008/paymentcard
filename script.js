@@ -3162,6 +3162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentTxs = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
         let totCustCharges = 0;
         let totPortalCharges = 0;
+        let txProfit = 0;
         
         currentTxs.forEach(t => {
             let txDateStr = t.date || t.timestamp || '';
@@ -3175,6 +3176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let pChg = amt * (parseFloat(d.portalPercent) || 0) / 100;
                     totCustCharges += cFee;
                     totPortalCharges += pChg;
+                    txProfit += (parseFloat(d.profit) || (cFee - pChg));
                 });
             }
         });
@@ -3188,7 +3190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        totalProfit = totCustCharges - totPortalCharges + filteredExtraProfit;
+        totalProfit = txProfit + filteredExtraProfit;
 
         const expensesTotalValue = document.getElementById('expensesTotalValue');
         const expensesProfitValue = document.getElementById('expensesProfitValue');
@@ -4072,6 +4074,7 @@ const renderDashboard = () => {
 
     let totCustCharges = 0;
     let totPortalCharges = 0;
+    let chgProfit = 0;
     let totExpenses = 0;
     let totTurnover = 0;
     let pendingCharges = 0;
@@ -4138,6 +4141,7 @@ const renderDashboard = () => {
                 if (!isBlacklisted) {
                     totCustCharges += cFee;
                     totPortalCharges += pChg;
+                    chgProfit += (parseFloat(d.profit) || (cFee - pChg));
                     totTurnover += amt;
                     if (d.chargesStatus === 'Pending') {
                         pendingCharges += cFee;
@@ -4147,45 +4151,52 @@ const renderDashboard = () => {
         }
     });
 
-    ledger.forEach(l => {
-        // Apply date filter to expenses too using timestamps
-        if (filterStart !== null && filterEnd !== null) {
-            let lDateStr = l.date || '';
-            let lTime = new Date(lDateStr).getTime();
-
-            // Robust fallback
-            if (isNaN(lTime) && lDateStr) {
-                const parts = lDateStr.split(/[-/]/);
-                if (parts.length === 3) {
-                    const p1 = parseInt(parts[0], 10);
-                    const p2 = parseInt(parts[1], 10);
-                    const p3 = parseInt(parts[2], 10);
-                    if (p3 > 2000) {
-                        if (p2 > 12) lTime = new Date(p3, p1 - 1, p2).getTime();
-                        else lTime = new Date(p3, p2 - 1, p1).getTime();
-                    }
+    const parseTime = (dateStr) => {
+        let t = new Date(dateStr).getTime();
+        if (isNaN(t) && dateStr) {
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length === 3) {
+                const p1 = parseInt(parts[0], 10);
+                const p2 = parseInt(parts[1], 10);
+                const p3 = parseInt(parts[2], 10);
+                if (p3 > 2000) {
+                    if (p2 > 12) t = new Date(p3, p1 - 1, p2).getTime();
+                    else t = new Date(p3, p2 - 1, p1).getTime();
                 }
             }
-
-            if (!isNaN(lTime)) {
-                if (lTime < filterStart || lTime > filterEnd) return;
-            }
         }
-        if (l.type?.toLowerCase() === 'expense') {
-            totExpenses += parseFloat(l.amount) || 0;
+        return t;
+    };
+
+    const passesFilter = (time) => {
+        if (isNaN(time)) return true;
+        if (filterStart !== null && time < filterStart) return false;
+        if (filterEnd !== null && time > filterEnd) return false;
+        return true;
+    };
+    // ledger expenses are no longer counted here to match the expenses page
+
+    const exps = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
+    exps.forEach(exp => {
+        let eTime = parseTime(exp.date || '');
+        if (passesFilter(eTime)) {
+            totExpenses += parseFloat(exp.amount) || 0;
         }
     });
 
-    const chgProfit = totCustCharges - totPortalCharges;
+    // chgProfit is already calculated inside the loop
     
     // Calculate total extra profit
     let totExtraProfit = 0;
     const eps = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
     eps.forEach(ep => {
-        totExtraProfit += parseFloat(ep.amount) || 0;
+        let epTime = parseTime(ep.date || '');
+        if (passesFilter(epTime)) {
+            totExtraProfit += parseFloat(ep.amount) || 0;
+        }
     });
 
-    const netProfit = chgProfit - totExpenses + totExtraProfit;
+    const netProfit = chgProfit;
 
     const formatValue = (num) => {
         if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
@@ -4194,11 +4205,13 @@ const renderDashboard = () => {
     };
 
     const dbNetProfit = document.getElementById('dbNetProfit');
+    const dbExtraProfit = document.getElementById('dbExtraProfit');
     const dbTurnover = document.getElementById('dbTurnover');
     const dbTotalCharges = document.getElementById('dbTotalCharges');
     const dbPendingCharges = document.getElementById('dbPendingCharges');
 
     if (dbNetProfit) dbNetProfit.textContent = '₹' + formatValue(netProfit);
+    if (dbExtraProfit) dbExtraProfit.textContent = '₹' + formatValue(totExtraProfit);
     if (dbTurnover) dbTurnover.textContent = '₹' + formatValue(totTurnover);
     if (dbTotalCharges) dbTotalCharges.textContent = '₹' + formatValue(totCustCharges);
     if (dbPendingCharges) dbPendingCharges.textContent = '₹' + formatValue(pendingCharges);
