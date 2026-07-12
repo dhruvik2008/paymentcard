@@ -99,7 +99,7 @@
 
       txs.forEach(t => {
         if (!t.raw) return;
-        if (t.raw.custIndex != origCustIndex) return;
+        if ((t.customerName || '').toLowerCase() !== c.name.toLowerCase()) return;
         
         billsRecv += parseFloat(t.raw.billTotal) || 0;
         
@@ -266,7 +266,7 @@
     let pendingTxs = [];
     
     txs.forEach((t, i) => {
-      if (t.raw && t.raw.custIndex == origCustIndex) {
+      if (t.raw && (t.customerName || '').toLowerCase() === customerName.toLowerCase()) {
         billsRecv += parseFloat(t.raw.billTotal) || 0;
         let txPay = 0;
         if (t.raw.payments) {
@@ -354,7 +354,7 @@
        if (amount > 0) {
          let pendingCharges = [];
          txs.forEach((t, i) => {
-           if (t.raw && t.raw.custIndex == origCustIndex && t.raw.debits) {
+           if (t.raw && (t.customerName || '').toLowerCase() === customerName.toLowerCase() && t.raw.debits) {
              t.raw.debits.forEach((d, dIdx) => {
                let status = (d.chargesStatus || '').toLowerCase();
                if (status === 'pending' || status === 'partially paid') {
@@ -600,7 +600,7 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
   
   txs.forEach(t => {
     if (!t.raw) return;
-    if (t.raw.custIndex != origCustIndex) return;
+    if ((t.customerName || '').toLowerCase() !== customerName.toLowerCase()) return;
     
     billsRecv += parseFloat(t.raw.billTotal) || 0;
     
@@ -710,7 +710,7 @@ function renderCbViewTable() {
   
   // Filter txs for this customer and preserve originalIndex
   const custTxs = txs.map((t, idx) => ({...t, originalIndex: idx}))
-                     .filter(t => t.raw && t.raw.custIndex == origCustIndex);
+                     .filter(t => t.raw && (t.customerName || '').toLowerCase() === currentCbViewCustomer.toLowerCase());
   
   let rows = [];
   const cust = allCustomers[origCustIndex];
@@ -960,7 +960,7 @@ function renderCbViewTable() {
     let billsPay = 0;
     
     txs.forEach(t => {
-      if (!t.raw || t.raw.custIndex != origCustIndex) return;
+      if (!t.raw || (t.customerName || '').toLowerCase() !== currentCbViewCustomer.toLowerCase()) return;
       billsRecv += parseFloat(t.raw.billTotal) || 0;
       if (t.raw.payments) {
         t.raw.payments.forEach(p => {
@@ -1066,7 +1066,7 @@ function renderCbViewTable() {
     const pdfTableBody = document.getElementById('pdfTableBody');
     pdfTableBody.innerHTML = '';
 
-    const custTxs = txs.filter(t => t.raw && t.raw.custIndex == origCustIndex);
+    const custTxs = txs.filter(t => t.raw && (t.customerName || '').toLowerCase() === currentCbViewCustomer.toLowerCase());
     
     custTxs.forEach(t => {
       if (t.raw.debits && t.raw.debits.length > 0) {
