@@ -564,6 +564,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ledgerAllEntriesSection = document.getElementById('ledgerAllEntriesSection');
     const addLedgerEntrySection = document.getElementById('addLedgerEntrySection');
 
+    // Expenses Nav
+    const navExpenses = document.getElementById('navExpenses');
+    const expensesSection = document.getElementById('expensesSection');
     const navPortalBalances = document.getElementById('nav-portal-balances');
     const allTransactionsSection = document.getElementById('allTransactionsSection');
     const portalBalancesSection = document.getElementById('portalBalancesSection');
@@ -588,6 +591,23 @@ document.addEventListener('DOMContentLoaded', () => {
             transactionsSubmenu.style.display = 'none';
         }
     });
+
+    if (navExpenses && expensesSection) {
+        navExpenses.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navExpenses.classList.add('active');
+            navLedgerGroup.classList.remove('active');
+            ledgerSubmenu.style.display = 'none';
+            navTransactionsGroup.classList.remove('active');
+            transactionsSubmenu.style.display = 'none';
+            navReportsGroup.classList.remove('active');
+            submenuReports.style.display = 'none';
+            showSection(expensesSection);
+            breadcrumbCurrent.textContent = 'Expenses';
+            if (typeof renderExpenses === 'function') renderExpenses();
+        });
+    }
 
     navLedgerGroup.addEventListener('click', (e) => {
         e.preventDefault();
@@ -3018,6 +3038,95 @@ document.addEventListener('DOMContentLoaded', () => {
     if (glCustomerFilter) glCustomerFilter.addEventListener('change', () => { window.currentLedgerPage = 1; renderLedgerEntries(); });
     if (glTypeFilter) glTypeFilter.addEventListener('change', () => { window.currentLedgerPage = 1; renderLedgerEntries(); });
 
+    // ==========================================
+    // Expenses Logic
+    // ==========================================
+    let cardbills_expenses = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
+    const expensesTotalValue = document.getElementById('expensesTotalValue');
+    const expensesForm = document.getElementById('expensesForm');
+    const expensesTableBody = document.getElementById('expensesTableBody');
+    const expenseName = document.getElementById('expenseName');
+    const expenseAmount = document.getElementById('expenseAmount');
+    const expenseDate = document.getElementById('expenseDate');
+    const openAddExpenseModalBtn = document.getElementById('openAddExpenseModalBtn');
+    const addExpenseModal = document.getElementById('addExpenseModal');
+    const closeAddExpenseModal = document.getElementById('closeAddExpenseModal');
+    const cancelAddExpenseBtn = document.getElementById('cancelAddExpenseBtn');
+
+    window.renderExpenses = () => {
+        if (!expensesTableBody) return;
+        expensesTableBody.innerHTML = '';
+        let total = 0;
+        
+        cardbills_expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((exp, idx) => {
+            total += parseFloat(exp.amount) || 0;
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #e5e7eb';
+            tr.innerHTML = `
+                <td style="padding: 12px 16px;">${new Date(exp.date).toLocaleDateString('en-GB')}</td>
+                <td style="padding: 12px 16px;">${exp.name}</td>
+                <td style="padding: 12px 16px; text-align: right; font-weight: 600; color: #ef4444;">₹ ${formatMoney(exp.amount)}</td>
+                <td style="padding: 12px 16px; text-align: center;">
+                    <button onclick="deleteExpense(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete Expense">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+            expensesTableBody.appendChild(tr);
+        });
+        
+        if(cardbills_expenses.length === 0) {
+            expensesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No expenses recorded yet.</td></tr>';
+        }
+        
+        if (expensesTotalValue) {
+            expensesTotalValue.innerHTML = `<span style="color: #9ca3af; font-size: 1.5rem;">₹</span> ${formatMoney(total)}`;
+        }
+    };
+
+    if (openAddExpenseModalBtn && addExpenseModal) {
+        openAddExpenseModalBtn.addEventListener('click', () => {
+            expenseName.value = '';
+            expenseAmount.value = '';
+            expenseDate.value = new Date().toISOString().split('T')[0];
+            addExpenseModal.style.display = 'flex';
+        });
+    }
+
+    const closeExpenseModalFunc = () => {
+        if (addExpenseModal) addExpenseModal.style.display = 'none';
+    };
+
+    if (closeAddExpenseModal) closeAddExpenseModal.addEventListener('click', closeExpenseModalFunc);
+    if (cancelAddExpenseBtn) cancelAddExpenseBtn.addEventListener('click', closeExpenseModalFunc);
+
+    if (expensesForm) {
+        expensesForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newExp = {
+                id: 'exp_' + Date.now(),
+                name: expenseName.value.trim(),
+                amount: parseFloat(expenseAmount.value) || 0,
+                date: expenseDate.value,
+                timestamp: Date.now()
+            };
+            cardbills_expenses.push(newExp);
+            localStorage.setItem('cardbills_expenses', JSON.stringify(cardbills_expenses));
+            renderExpenses();
+            showToast('Expense added successfully!');
+            closeExpenseModalFunc();
+        });
+    }
+
+    window.deleteExpense = (idx) => {
+        if(confirm('Are you sure you want to delete this expense?')) {
+            cardbills_expenses.splice(idx, 1);
+            localStorage.setItem('cardbills_expenses', JSON.stringify(cardbills_expenses));
+            renderExpenses();
+            showToast('Expense deleted.');
+        }
+    };
+
     // Sync Firebase Data for encapsulated variables
     window.addEventListener('data-synced', (e) => {
         const key = e.detail;
@@ -3031,6 +3140,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof window.updateDashboardStats === 'function') window.updateDashboardStats();
         } else if (key === 'cardbills_ledger_entries') {
             if (typeof window.renderLedgerEntries === 'function') window.renderLedgerEntries();
+        } else if (key === 'cardbills_expenses') {
+            cardbills_expenses = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
+            if (typeof window.renderExpenses === 'function') window.renderExpenses();
         }
     });
 
@@ -4228,7 +4340,7 @@ window.handleAuthSubmit = (e) => {
                     localStorage.setItem('cardbills_logged_in_user_email', email);
 
                     // Clear any previous local storage keys for other users
-                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals'];
+                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses'];
                     SYNC_KEYS.forEach(k => localStorage.removeItem(k));
 
                     hideAuthScreen();
@@ -4315,7 +4427,8 @@ window.exportBackupFile = () => {
         cardbills_customers: JSON.parse(localStorage.getItem('cardbills_customers') || '[]'),
         cardbills_transactions: JSON.parse(localStorage.getItem('cardbills_transactions') || '[]'),
         cardbills_ledger_entries: JSON.parse(localStorage.getItem('cardbills_ledger_entries') || '[]'),
-        cardbills_portals: JSON.parse(localStorage.getItem('cardbills_portals') || '[]')
+        cardbills_portals: JSON.parse(localStorage.getItem('cardbills_portals') || '[]'),
+        cardbills_expenses: JSON.parse(localStorage.getItem('cardbills_expenses') || '[]')
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -4338,7 +4451,7 @@ window.importBackupFile = (event) => {
     reader.onload = (e) => {
         try {
             const backupData = JSON.parse(e.target.result);
-            const keys = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals'];
+            const keys = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses'];
             const hasRequiredKeys = keys.every(key => Array.isArray(backupData[key]));
             if (!hasRequiredKeys) {
                 alert('Invalid backup file. Missing required data arrays.');
@@ -4349,6 +4462,9 @@ window.importBackupFile = (event) => {
                 localStorage.setItem('cardbills_transactions', JSON.stringify(backupData.cardbills_transactions));
                 localStorage.setItem('cardbills_ledger_entries', JSON.stringify(backupData.cardbills_ledger_entries));
                 localStorage.setItem('cardbills_portals', JSON.stringify(backupData.cardbills_portals));
+                if (backupData.cardbills_expenses) {
+                    localStorage.setItem('cardbills_expenses', JSON.stringify(backupData.cardbills_expenses));
+                }
                 showToast('Data restored successfully! Syncing with Firebase...', 'success');
                 setTimeout(() => location.reload(), 1500);
             }
