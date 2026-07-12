@@ -571,6 +571,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Extra Profit Nav
     const navExtraProfit = document.getElementById('navExtraProfit');
     const extraProfitSection = document.getElementById('extraProfitSection');
+
+    if (loggedInEmail !== 'jayeshmaniya18@gmail.com') {
+        if (navExpenses) navExpenses.style.display = 'none';
+        if (navExtraProfit) navExtraProfit.style.display = 'none';
+    }
     const navPortalBalances = document.getElementById('nav-portal-balances');
     const allTransactionsSection = document.getElementById('allTransactionsSection');
     const portalBalancesSection = document.getElementById('portalBalancesSection');
@@ -3173,8 +3178,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
+        
+        let filteredExtraProfit = 0;
+        const currentExtraProfits = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
+        currentExtraProfits.forEach(ep => {
+            let epDateStr = ep.date || '';
+            if (passesFilter(epDateStr)) {
+                filteredExtraProfit += parseFloat(ep.amount) || 0;
+            }
+        });
 
-        totalProfit = totCustCharges - totPortalCharges;
+        totalProfit = totCustCharges - totPortalCharges + filteredExtraProfit;
 
         const expensesTotalValue = document.getElementById('expensesTotalValue');
         const expensesProfitValue = document.getElementById('expensesProfitValue');
