@@ -3056,10 +3056,62 @@ document.addEventListener('DOMContentLoaded', () => {
     window.renderExpenses = () => {
         if (!expensesTableBody) return;
         expensesTableBody.innerHTML = '';
-        let total = 0;
+        let totalExpenses = 0;
+        let totalProfit = 0;
+
+        const now = new Date();
+        let filterStart = null;
+        let filterEnd = null;
+
+        if (currentExpenseFilter === 'today') {
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            filterStart = d.getTime();
+            filterEnd = d.getTime() + 86399999;
+        } else if (currentExpenseFilter === 'monthly') {
+            const y = now.getFullYear();
+            const m = now.getMonth();
+            filterStart = new Date(y, m, 1).getTime();
+            filterEnd = new Date(y, m + 1, 0, 23, 59, 59, 999).getTime();
+        } else if (currentExpenseFilter === 'yearly') {
+            const y = now.getFullYear();
+            filterStart = new Date(y, 0, 1).getTime();
+            filterEnd = new Date(y, 11, 31, 23, 59, 59, 999).getTime();
+        } else if (currentExpenseFilter === 'custom') {
+            const startInput = document.getElementById('expStartDate').value;
+            const endInput = document.getElementById('expEndDate').value;
+            if (startInput) filterStart = new Date(startInput).getTime();
+            if (endInput) filterEnd = new Date(endInput).getTime() + 86399999;
+        }
+
+        const passesFilter = (dateStr) => {
+            if (filterStart === null && filterEnd === null) return true;
+            let time = new Date(dateStr).getTime();
+            if (isNaN(time) && dateStr) {
+                const parts = dateStr.split(/[-/]/);
+                if (parts.length === 3) {
+                    const p1 = parseInt(parts[0], 10);
+                    const p2 = parseInt(parts[1], 10);
+                    const p3 = parseInt(parts[2], 10);
+                    if (p3 > 2000) {
+                        if (p2 > 12) time = new Date(p3, p1 - 1, p2).getTime();
+                        else time = new Date(p3, p2 - 1, p1).getTime();
+                    }
+                }
+            }
+            if (!isNaN(time)) {
+                if (filterStart !== null && time < filterStart) return false;
+                if (filterEnd !== null && time > filterEnd) return false;
+            }
+            return true;
+        };
+
+        // Filter and render expenses
+        const filteredExpenses = cardbills_expenses.filter(exp => passesFilter(exp.date));
         
-        cardbills_expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((exp, idx) => {
-            total += parseFloat(exp.amount) || 0;
+        filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((exp) => {
+            totalExpenses += parseFloat(exp.amount) || 0;
+            const originalIdx = cardbills_expenses.indexOf(exp);
+            
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #e5e7eb';
             tr.innerHTML = `
@@ -3067,7 +3119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="padding: 12px 16px;">${exp.name}</td>
                 <td style="padding: 12px 16px; text-align: right; font-weight: 600; color: #ef4444;">₹ ${formatMoney(exp.amount)}</td>
                 <td style="padding: 12px 16px; text-align: center;">
-                    <button onclick="deleteExpense(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete Expense">
+                    <button onclick="deleteExpense(${originalIdx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete Expense">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </td>
@@ -3075,12 +3127,41 @@ document.addEventListener('DOMContentLoaded', () => {
             expensesTableBody.appendChild(tr);
         });
         
-        if(cardbills_expenses.length === 0) {
+        if(filteredExpenses.length === 0) {
             expensesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No expenses recorded yet.</td></tr>';
         }
         
+        // Calculate Profit from transactions for the same date filter
+        const currentTxs = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
+        let totCustCharges = 0;
+        let totPortalCharges = 0;
+        
+        currentTxs.forEach(t => {
+            let txDateStr = t.date || t.timestamp || '';
+            if (!passesFilter(txDateStr)) return;
+            if (t.isSettlement || t.customerName === 'Settlement Account') return; 
+
+            if (t.raw && t.raw.debits) {
+                t.raw.debits.forEach(d => {
+                    let amt = parseFloat(d.amount) || 0;
+                    let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
+                    let pChg = amt * (parseFloat(d.portalPercent) || 0) / 100;
+                    totCustCharges += cFee;
+                    totPortalCharges += pChg;
+                });
+            }
+        });
+
+        totalProfit = totCustCharges - totPortalCharges;
+
+        const expensesTotalValue = document.getElementById('expensesTotalValue');
+        const expensesProfitValue = document.getElementById('expensesProfitValue');
+
         if (expensesTotalValue) {
-            expensesTotalValue.innerHTML = `<span style="color: #9ca3af; font-size: 1.5rem;">₹</span> ${formatMoney(total)}`;
+            expensesTotalValue.innerHTML = `<span style="color: #fca5a5; font-size: 1.5rem;">₹</span> ${formatMoney(totalExpenses)}`;
+        }
+        if (expensesProfitValue) {
+            expensesProfitValue.innerHTML = `<span style="color: #6ee7b7; font-size: 1.5rem;">₹</span> ${formatMoney(totalProfit)}`;
         }
     };
 
@@ -3157,6 +3238,34 @@ let dashboardBrandChart = null;
 let currentWeeklyFilter = 'this_week';
 let currentScheduleFilter = 'today';
 let currentFinancialFilter = 'today';
+let currentExpenseFilter = 'monthly';
+
+window.setExpenseFilter = (filter) => {
+    currentExpenseFilter = filter;
+    
+    // Update active button styling
+    ['Today', 'Monthly', 'Yearly', 'Custom'].forEach(f => {
+        const btn = document.getElementById('expFilter' + f);
+        if (btn) {
+            if (f.toLowerCase() === filter) {
+                btn.style.background = 'white';
+                btn.style.color = '#0f172a';
+                btn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            } else {
+                btn.style.background = 'transparent';
+                btn.style.color = '#64748b';
+                btn.style.boxShadow = 'none';
+            }
+        }
+    });
+
+    const customWrapper = document.getElementById('expCustomDateWrapper');
+    if (customWrapper) {
+        customWrapper.style.display = filter === 'custom' ? 'flex' : 'none';
+    }
+
+    renderExpenses();
+};
 
 
 // ==================== SETTINGS & PORTALS ====================
