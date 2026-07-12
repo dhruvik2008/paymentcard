@@ -1130,10 +1130,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             populateWizardCustomers();
-            wizardCustomer.value = tx.raw.custIndex;
-
+            const sortedCustArray = [...customers].sort((a, b) => a.name.localeCompare(b.name));
+            const currentSortedIdx = sortedCustArray.findIndex(c => c.name === tx.customerName);
+            wizardCustomer.value = currentSortedIdx >= 0 ? currentSortedIdx : tx.raw.custIndex;
             wizardCard.innerHTML = '<option value="" disabled selected hidden></option>';
-            const customer = [...customers].sort((a, b) => a.name.localeCompare(b.name))[tx.raw.custIndex];
+            const customer = currentSortedIdx >= 0 ? sortedCustArray[currentSortedIdx] : sortedCustArray[tx.raw.custIndex];
             if (customer.cards && customer.cards.length > 0) {
                 wizardCard.disabled = false;
                 customer.cards.forEach((card, index) => {
@@ -4075,8 +4076,8 @@ const renderDashboard = () => {
 
     currentTxs.forEach(tx => {
         if (!tx.raw || tx.isSettlement) return;
-        const cust = currentCustomers[tx.raw.custIndex];
-        const card = cust && cust.cards ? cust.cards[tx.raw.cardIndex] : null;
+        const cust = currentCustomers.find(c => c.name === tx.customerName);
+        const card = cust && cust.cards && tx.raw ? cust.cards[tx.raw.cardIndex] : null;
         const pendingStr = tx.pending || '0';
         const pendingVal = parseFloat(pendingStr.replace(/[^0-9.-]/g, '')) || 0;
 
