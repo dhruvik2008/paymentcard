@@ -567,6 +567,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expenses Nav
     const navExpenses = document.getElementById('navExpenses');
     const expensesSection = document.getElementById('expensesSection');
+    
+    // Extra Profit Nav
+    const navExtraProfit = document.getElementById('navExtraProfit');
+    const extraProfitSection = document.getElementById('extraProfitSection');
     const navPortalBalances = document.getElementById('nav-portal-balances');
     const allTransactionsSection = document.getElementById('allTransactionsSection');
     const portalBalancesSection = document.getElementById('portalBalancesSection');
@@ -606,6 +610,23 @@ document.addEventListener('DOMContentLoaded', () => {
             showSection(expensesSection);
             breadcrumbCurrent.textContent = 'Expenses';
             if (typeof renderExpenses === 'function') renderExpenses();
+        });
+    }
+
+    if (navExtraProfit && extraProfitSection) {
+        navExtraProfit.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navExtraProfit.classList.add('active');
+            navLedgerGroup.classList.remove('active');
+            ledgerSubmenu.style.display = 'none';
+            navTransactionsGroup.classList.remove('active');
+            transactionsSubmenu.style.display = 'none';
+            navReportsGroup.classList.remove('active');
+            submenuReports.style.display = 'none';
+            showSection(extraProfitSection);
+            breadcrumbCurrent.textContent = 'Extra Profit';
+            if (typeof renderExtraProfit === 'function') renderExtraProfit();
         });
     }
 
@@ -3209,6 +3230,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Extra Profit Logic
+    // ==========================================
+    let cardbills_extra_profit = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
+    const extraProfitTotalValue = document.getElementById('extraProfitTotalValue');
+    const extraProfitForm = document.getElementById('extraProfitForm');
+    const extraProfitTableBody = document.getElementById('extraProfitTableBody');
+    const extraProfitName = document.getElementById('extraProfitName');
+    const extraProfitAmount = document.getElementById('extraProfitAmount');
+    const extraProfitDate = document.getElementById('extraProfitDate');
+    const openAddExtraProfitModalBtn = document.getElementById('openAddExtraProfitModalBtn');
+    const addExtraProfitModal = document.getElementById('addExtraProfitModal');
+    const closeAddExtraProfitModal = document.getElementById('closeAddExtraProfitModal');
+    const cancelExtraProfitBtn = document.getElementById('cancelExtraProfitBtn');
+
+    window.renderExtraProfit = () => {
+        if (!extraProfitTableBody) return;
+        extraProfitTableBody.innerHTML = '';
+        let totalExtraProfit = 0;
+
+        cardbills_extra_profit.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((ep, idx) => {
+            totalExtraProfit += parseFloat(ep.amount) || 0;
+            
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #e5e7eb';
+            tr.innerHTML = `
+                <td style="padding: 12px 16px;">${new Date(ep.date).toLocaleDateString('en-GB')}</td>
+                <td style="padding: 12px 16px; font-weight: 500; color: #111827;">${ep.name || '-'}</td>
+                <td style="padding: 12px 16px; text-align: right; color: #059669; font-weight: 600;">₹${parseFloat(ep.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 12px 16px; text-align: center;">
+                    <button onclick="deleteExtraProfit(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+            extraProfitTableBody.appendChild(tr);
+        });
+
+        if (extraProfitTotalValue) {
+            extraProfitTotalValue.innerHTML = `<span style="color: #34d399; font-size: 1.5rem;">₹</span> ${totalExtraProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+        
+        // Also update dashboard if currently viewing it
+        if (typeof window.updateDashboardStats === 'function') {
+            window.updateDashboardStats();
+        }
+    };
+
+    const closeExtraProfitModalFunc = () => {
+        if(addExtraProfitModal) addExtraProfitModal.style.display = 'none';
+        if(extraProfitForm) extraProfitForm.reset();
+    };
+
+    if (openAddExtraProfitModalBtn && addExtraProfitModal) {
+        openAddExtraProfitModalBtn.addEventListener('click', () => {
+            extraProfitName.value = '';
+            extraProfitAmount.value = '';
+            extraProfitDate.value = new Date().toISOString().split('T')[0];
+            addExtraProfitModal.style.display = 'flex';
+        });
+    }
+
+    if (closeAddExtraProfitModal) closeAddExtraProfitModal.addEventListener('click', closeExtraProfitModalFunc);
+    if (cancelExtraProfitBtn) cancelExtraProfitBtn.addEventListener('click', closeExtraProfitModalFunc);
+
+    if (extraProfitForm) {
+        extraProfitForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newEp = {
+                name: extraProfitName.value.trim(),
+                amount: parseFloat(extraProfitAmount.value) || 0,
+                date: extraProfitDate.value,
+                timestamp: Date.now()
+            };
+            cardbills_extra_profit.push(newEp);
+            localStorage.setItem('cardbills_extra_profit', JSON.stringify(cardbills_extra_profit));
+            renderExtraProfit();
+            showToast('Extra Profit added successfully!', 'success');
+            closeExtraProfitModalFunc();
+        });
+    }
+
+    window.deleteExtraProfit = (idx) => {
+        if(confirm('Are you sure you want to delete this extra profit entry?')) {
+            cardbills_extra_profit.splice(idx, 1);
+            localStorage.setItem('cardbills_extra_profit', JSON.stringify(cardbills_extra_profit));
+            renderExtraProfit();
+            showToast('Extra Profit deleted.', 'info');
+        }
+    };
+
     // Sync Firebase Data for encapsulated variables
     window.addEventListener('data-synced', (e) => {
         const key = e.detail;
@@ -3225,6 +3336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (key === 'cardbills_expenses') {
             cardbills_expenses = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
             if (typeof window.renderExpenses === 'function') window.renderExpenses();
+        } else if (key === 'cardbills_extra_profit') {
+            cardbills_extra_profit = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
+            if (typeof window.renderExtraProfit === 'function') window.renderExtraProfit();
         }
     });
 
@@ -4049,7 +4163,15 @@ const renderDashboard = () => {
     });
 
     const chgProfit = totCustCharges - totPortalCharges;
-    const netProfit = chgProfit - totExpenses;
+    
+    // Calculate total extra profit
+    let totExtraProfit = 0;
+    const eps = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
+    eps.forEach(ep => {
+        totExtraProfit += parseFloat(ep.amount) || 0;
+    });
+
+    const netProfit = chgProfit - totExpenses + totExtraProfit;
 
     const formatValue = (num) => {
         if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
@@ -4450,7 +4572,7 @@ window.handleAuthSubmit = (e) => {
                     localStorage.setItem('cardbills_logged_in_user_email', email);
 
                     // Clear any previous local storage keys for other users
-                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses'];
+                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
                     SYNC_KEYS.forEach(k => localStorage.removeItem(k));
 
                     hideAuthScreen();
@@ -4469,7 +4591,7 @@ window.handleAuthSubmit = (e) => {
                 localStorage.setItem('cardbills_logged_in_user_email', email);
 
                 // Clear local storage for a fresh sync
-                const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals'];
+                const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
                 SYNC_KEYS.forEach(k => {
                     localStorage.removeItem(k);
                     localStorage.removeItem('cardbills_firebase_synced_' + k);
@@ -4515,7 +4637,7 @@ function hideAuthScreen() {
 window.handleSignOut = () => {
     localStorage.removeItem('cardbills_auth_user');
     localStorage.removeItem('cardbills_logged_in_user_email');
-    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals'];
+    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
     SYNC_KEYS.forEach(k => {
         localStorage.removeItem(k);
         localStorage.removeItem('cardbills_firebase_synced_' + k);
@@ -4538,7 +4660,8 @@ window.exportBackupFile = () => {
         cardbills_transactions: JSON.parse(localStorage.getItem('cardbills_transactions') || '[]'),
         cardbills_ledger_entries: JSON.parse(localStorage.getItem('cardbills_ledger_entries') || '[]'),
         cardbills_portals: JSON.parse(localStorage.getItem('cardbills_portals') || '[]'),
-        cardbills_expenses: JSON.parse(localStorage.getItem('cardbills_expenses') || '[]')
+        cardbills_expenses: JSON.parse(localStorage.getItem('cardbills_expenses') || '[]'),
+        cardbills_extra_profit: JSON.parse(localStorage.getItem('cardbills_extra_profit') || '[]')
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -4574,6 +4697,9 @@ window.importBackupFile = (event) => {
                 localStorage.setItem('cardbills_portals', JSON.stringify(backupData.cardbills_portals));
                 if (backupData.cardbills_expenses) {
                     localStorage.setItem('cardbills_expenses', JSON.stringify(backupData.cardbills_expenses));
+                }
+                if (backupData.cardbills_extra_profit) {
+                    localStorage.setItem('cardbills_extra_profit', JSON.stringify(backupData.cardbills_extra_profit));
                 }
                 showToast('Data restored successfully! Syncing with Firebase...', 'success');
                 setTimeout(() => location.reload(), 1500);
