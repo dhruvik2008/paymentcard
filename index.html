@@ -529,6 +529,13 @@
           </svg>
           Expenses
         </a>
+        <a href="#" class="nav-item" id="navExtraProfit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          Extra Profit
+        </a>
         <a href="#" class="nav-item has-submenu" id="navReportsGroup">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -1383,6 +1390,62 @@
                   </tr>
                 </thead>
                 <tbody id="expensesTableBody">
+                  <!-- Entries will go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Extra Profit Section -->
+      <section id="extraProfitSection" class="page-section" style="display: none; flex-direction: column;">
+        <div class="page-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h2 class="page-title">Extra Profit</h2>
+            <p class="page-subtitle">Track additional and miscellaneous profits</p>
+          </div>
+          <button id="openAddExtraProfitModalBtn" class="btn btn-primary" style="background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Extra Profit
+          </button>
+        </div>
+
+        <div class="page-content" style="padding: 0; background: transparent;">
+          
+          <!-- Summary Card -->
+          <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Extra Profit Card -->
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #bbf7d0; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16,185,129,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)';">
+              <div>
+                <h3 style="margin: 0; font-size: 0.85rem; color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Total Extra Profit</h3>
+                <div id="extraProfitTotalValue" style="font-size: 2.25rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
+                  <span style="color: #34d399; font-size: 1.5rem;">₹</span> 0.00
+                </div>
+              </div>
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Profit List -->
+          <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+              <h3 style="margin: 0; font-size: 1.05rem; font-weight: 600; color: #111827;">Extra Profit Entries</h3>
+            </div>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead>
+                  <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">
+                    <th style="padding: 12px 16px;">Date</th>
+                    <th style="padding: 12px 16px;">Name</th>
+                    <th style="padding: 12px 16px; text-align: right;">Amount</th>
+                    <th style="padding: 12px 16px; text-align: center; width: 80px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="extraProfitTableBody">
                   <!-- Entries will go here -->
                 </tbody>
               </table>
@@ -3698,6 +3761,36 @@
           <div style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 12px;">
             <button type="button" id="cancelAddExpenseBtn" class="btn btn-outline" style="background: white; border-color: #d1d5db; color: #374151; border-radius: 6px; padding: 10px 16px; font-weight: 600; cursor: pointer;">Cancel</button>
             <button type="submit" class="btn" style="background-color: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Save Expense</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Extra Profit Modal -->
+  <div class="modal" id="addExtraProfitModal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; border-radius: 12px; width: 500px; max-width: 90vw; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+      <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0;">Add Extra Profit</h3>
+        <button id="closeAddExtraProfitModal" style="background: transparent; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer;">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <form id="extraProfitForm" style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Profit Source Name</label>
+            <input type="text" id="extraProfitName" required placeholder="e.g. Cashback, Referral Bonus" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Amount (₹)</label>
+            <input type="number" id="extraProfitAmount" required placeholder="0.00" min="0" step="0.01" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Date</label>
+            <input type="date" id="extraProfitDate" required style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button type="button" id="cancelExtraProfitBtn" style="padding: 10px 16px; border: 1px solid #d1d5db; background: white; color: #4b5563; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button type="submit" style="padding: 10px 20px; background: #10b981; color: white; border: none; font-weight: 600; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Save Entry</button>
           </div>
         </form>
       </div>
