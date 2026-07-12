@@ -116,10 +116,11 @@
             chargesRecv += cFee; 
             
             let status = (d.chargesStatus || '').toLowerCase();
+            let dPaid = parseFloat(d.paidAmount) || 0;
             if (status === 'fully paid' || status === 'settled') {
                chargesPay += cFee;
-            } else if (status === 'partially paid' && d.paidAmount) {
-               chargesPay += parseFloat(d.paidAmount) || 0;
+            } else if (dPaid > 0) {
+               chargesPay += dPaid;
             }
           });
         }
@@ -263,6 +264,7 @@
     let billsRecv = 0;
     let billsPay = 0;
     let chargesRecv = 0;
+    let chargesPay = 0;
     let pendingTxs = [];
     
     txs.forEach((t, i) => {
@@ -277,7 +279,15 @@
         let txCharge = 0;
         if (t.raw.debits) {
           t.raw.debits.forEach(d => {
-             txCharge += parseFloat(d.charges) || ((parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100);
+             let cFee = parseFloat(d.charges) || ((parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100);
+             txCharge += cFee;
+             let status = (d.chargesStatus || '').toLowerCase();
+             let dPaid = parseFloat(d.paidAmount) || 0;
+             if (status === 'fully paid' || status === 'settled') {
+                chargesPay += cFee;
+             } else if (dPaid > 0) {
+                chargesPay += dPaid;
+             }
           });
         }
         chargesRecv += txCharge;
@@ -306,7 +316,7 @@
     else { ledgerPay = Math.abs(ledgerNet); ledgerRecv = 0; }
     
     const totRecv = chargesRecv + ledgerRecv + billsRecv;
-    const totPay = ledgerPay + billsPay;
+    const totPay = chargesPay + ledgerPay + billsPay;
     const netCollect = totRecv - totPay;
     
     if (type === 'receive') {
@@ -615,6 +625,14 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
         let amt = parseFloat(d.amount) || 0;
         let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
         chargesRecv += cFee; 
+        
+        let status = (d.chargesStatus || '').toLowerCase();
+        let dPaid = parseFloat(d.paidAmount) || 0;
+        if (status === 'fully paid' || status === 'settled') {
+           chargesPay += cFee;
+        } else if (dPaid > 0) {
+           chargesPay += dPaid;
+        }
       });
     }
   });
@@ -972,6 +990,14 @@ function renderCbViewTable() {
           let amt = parseFloat(d.amount) || 0;
           let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
           chargesRecv += cFee; 
+          
+          let status = (d.chargesStatus || '').toLowerCase();
+          let dPaid = parseFloat(d.paidAmount) || 0;
+          if (status === 'fully paid' || status === 'settled') {
+             chargesPay += cFee;
+          } else if (dPaid > 0) {
+             chargesPay += dPaid;
+          }
         });
       }
     });
