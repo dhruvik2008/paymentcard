@@ -666,7 +666,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Status metrics grid -->
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
             <div class="stat-card dash-card" style="display: flex; align-items: center; gap: 16px;">
@@ -888,12 +888,16 @@
               </tbody>
             </table>
             <!-- Transaction Bills Pagination -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb;background:#f9fafb;border-radius:0 0 10px 10px;">
-              <button id="btnPrevTx" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;" disabled>
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb;background:#f9fafb;border-radius:0 0 10px 10px;">
+              <button id="btnPrevTx" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;"
+                disabled>
                 ← Previous
               </button>
               <span id="pageTextTx" style="font-size:0.85rem;color:#6b7280;font-weight:500;">Page 1 of 1</span>
-              <button id="btnNextTx" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
+              <button id="btnNextTx" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
                 Next →
               </button>
             </div>
@@ -1020,12 +1024,16 @@
               </tbody>
             </table>
             <!-- All Transactions Pagination -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb;background:#f9fafb;border-radius:0 0 10px 10px;">
-              <button id="btnPrevAllTx" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;" disabled>
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb;background:#f9fafb;border-radius:0 0 10px 10px;">
+              <button id="btnPrevAllTx" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;"
+                disabled>
                 ← Previous
               </button>
               <span id="pageTextAllTx" style="font-size:0.85rem;color:#6b7280;font-weight:500;">Page 1 of 1</span>
-              <button id="btnNextAllTx" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
+              <button id="btnNextAllTx" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
                 Next →
               </button>
             </div>
@@ -1314,38 +1322,54 @@
 
       <!-- Expenses Section -->
       <section id="expensesSection" class="page-section" style="display: none; flex-direction: column;">
-        <div class="page-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="page-header"
+          style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <h2 class="page-title">Expenses</h2>
             <p class="page-subtitle">Track shop and other independent expenses</p>
           </div>
-          <button id="openAddExpenseModalBtn" class="btn btn-primary" style="background-color: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <button id="openAddExpenseModalBtn" class="btn btn-primary"
+            style="background-color: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
             Add Expense
           </button>
         </div>
 
         <div class="page-content" style="padding: 0; background: transparent;">
-          
+
           <!-- Filters -->
-          <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between;">
+          <div
+            style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between;">
             <!-- Segmented Control -->
-            <div style="display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-              <button id="expFilterToday" onclick="setExpenseFilter('today')" style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Today</button>
-              <button id="expFilterMonthly" onclick="setExpenseFilter('monthly')" style="border: none; background: white; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #0f172a; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">Monthly</button>
-              <button id="expFilterYearly" onclick="setExpenseFilter('yearly')" style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Yearly</button>
-              <button id="expFilterCustom" onclick="setExpenseFilter('custom')" style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Custom</button>
+            <div
+              style="display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+              <button id="expFilterToday" onclick="setExpenseFilter('today')"
+                style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Today</button>
+              <button id="expFilterMonthly" onclick="setExpenseFilter('monthly')"
+                style="border: none; background: white; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #0f172a; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">Monthly</button>
+              <button id="expFilterYearly" onclick="setExpenseFilter('yearly')"
+                style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Yearly</button>
+              <button id="expFilterCustom" onclick="setExpenseFilter('custom')"
+                style="border: none; background: transparent; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;">Custom</button>
             </div>
-            
+
             <!-- Custom Date Inputs -->
             <div id="expCustomDateWrapper" style="display: none; align-items: center; gap: 16px;">
-              <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+              <div
+                style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
                 <label style="font-size: 0.8rem; font-weight: 600; color: #64748b;">From</label>
-                <input type="date" id="expStartDate" style="border: none; background: transparent; font-size: 0.9rem; color: #0f172a; font-family: inherit; outline: none; cursor: pointer;" onchange="renderExpenses()">
+                <input type="date" id="expStartDate"
+                  style="border: none; background: transparent; font-size: 0.9rem; color: #0f172a; font-family: inherit; outline: none; cursor: pointer;"
+                  onchange="renderExpenses()">
               </div>
-              <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+              <div
+                style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
                 <label style="font-size: 0.8rem; font-weight: 600; color: #64748b;">To</label>
-                <input type="date" id="expEndDate" style="border: none; background: transparent; font-size: 0.9rem; color: #0f172a; font-family: inherit; outline: none; cursor: pointer;" onchange="renderExpenses()">
+                <input type="date" id="expEndDate"
+                  style="border: none; background: transparent; font-size: 0.9rem; color: #0f172a; font-family: inherit; outline: none; cursor: pointer;"
+                  onchange="renderExpenses()">
               </div>
             </div>
           </div>
@@ -1353,34 +1377,55 @@
           <!-- Summary Cards -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
             <!-- Profit Card -->
-            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #bbf7d0; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16,185,129,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)';">
+            <div
+              style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #bbf7d0; transition: transform 0.2s, box-shadow 0.2s;"
+              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16,185,129,0.15)';"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)';">
               <div>
-                <h3 style="margin: 0; font-size: 0.85rem; color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Profit</h3>
-                <div id="expensesProfitValue" style="font-size: 2.25rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
+                <h3
+                  style="margin: 0; font-size: 0.85rem; color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+                  Profit</h3>
+                <div id="expensesProfitValue"
+                  style="font-size: 2.25rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
                   <span style="color: #34d399; font-size: 1.5rem;">₹</span> 0.00
                 </div>
               </div>
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 14-4-4-6 6"></path></svg>
+              <div
+                style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M13 7h8m0 0v8m0-8l-8 14-4-4-6 6"></path>
+                </svg>
               </div>
             </div>
             <!-- Total Expenses Card -->
-            <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #fecaca; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239,68,68,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.1)';">
+            <div
+              style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #fecaca; transition: transform 0.2s, box-shadow 0.2s;"
+              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239,68,68,0.15)';"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.1)';">
               <div>
-                <h3 style="margin: 0; font-size: 0.85rem; color: #dc2626; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Total Expenses</h3>
-                <div id="expensesTotalValue" style="font-size: 2.25rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 4px;">
+                <h3
+                  style="margin: 0; font-size: 0.85rem; color: #dc2626; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+                  Total Expenses</h3>
+                <div id="expensesTotalValue"
+                  style="font-size: 2.25rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 4px;">
                   <span style="color: #f87171; font-size: 1.5rem;">₹</span> 0.00
                 </div>
               </div>
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #ef4444; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 17h8m0 0V9m0 8l-8-14-4 4-6-6"></path></svg>
+              <div
+                style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #ef4444; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M13 17h8m0 0V9m0 8l-8-14-4 4-6-6"></path>
+                </svg>
               </div>
             </div>
           </div>
 
 
           <!-- Expenses List -->
-          <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
+          <div
+            style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
             <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
               <h3 style="margin: 0; font-size: 1.05rem; font-weight: 600; color: #111827;">Expense Entries</h3>
             </div>
@@ -1406,37 +1451,53 @@
 
       <!-- Extra Profit Section -->
       <section id="extraProfitSection" class="page-section" style="display: none; flex-direction: column;">
-        <div class="page-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="page-header"
+          style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <h2 class="page-title">Extra Profit</h2>
             <p class="page-subtitle">Track additional and miscellaneous profits</p>
           </div>
-          <button id="openAddExtraProfitModalBtn" class="btn btn-primary" style="background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <button id="openAddExtraProfitModalBtn" class="btn btn-primary"
+            style="background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
             Add Extra Profit
           </button>
         </div>
 
         <div class="page-content" style="padding: 0; background: transparent;">
-          
+
           <!-- Summary Card -->
           <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px;">
             <!-- Extra Profit Card -->
-            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #bbf7d0; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16,185,129,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)';">
+            <div
+              style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #bbf7d0; transition: transform 0.2s, box-shadow 0.2s;"
+              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16,185,129,0.15)';"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)';">
               <div>
-                <h3 style="margin: 0; font-size: 0.85rem; color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Total Extra Profit</h3>
-                <div id="extraProfitTotalValue" style="font-size: 2.25rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
+                <h3
+                  style="margin: 0; font-size: 0.85rem; color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+                  Total Extra Profit</h3>
+                <div id="extraProfitTotalValue"
+                  style="font-size: 2.25rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
                   <span style="color: #34d399; font-size: 1.5rem;">₹</span> 0.00
                 </div>
               </div>
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div
+                style="width: 56px; height: 56px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                  </path>
+                </svg>
               </div>
             </div>
           </div>
 
           <!-- Extra Profit List -->
-          <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
+          <div
+            style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
             <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
               <h3 style="margin: 0; font-size: 1.05rem; font-weight: 600; color: #111827;">Extra Profit Entries</h3>
             </div>
@@ -2056,12 +2117,16 @@
               </table>
             </div>
             <!-- Net Profit Pagination -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-top:1px solid #e5e7eb;background:#f9fafb;">
-              <button id="btnPrevNp" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;" disabled>
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-top:1px solid #e5e7eb;background:#f9fafb;">
+              <button id="btnPrevNp" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;"
+                disabled>
                 ← Previous
               </button>
               <span id="pageTextNp" style="font-size:0.85rem;color:#6b7280;font-weight:500;">Page 1 of 1</span>
-              <button id="btnNextNp" class="btn" style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
+              <button id="btnNextNp" class="btn"
+                style="background:white;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
                 Next →
               </button>
             </div>
@@ -2782,7 +2847,8 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <polyline points="19 12 12 19 5 12"></polyline>
-                  </svg></div>
+                  </svg>
+                </div>
                 <h2 style="font-size: 1.1rem; font-weight: 600; color: #1f2937; margin: 0;">Payment History</h2>
               </div>
               <div id="viewTxPaymentCount"
@@ -2833,7 +2899,8 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
                     <polyline points="5 12 12 5 19 12"></polyline>
-                  </svg></div>
+                  </svg>
+                </div>
                 <h2 style="font-size: 1.1rem; font-weight: 600; color: #1f2937; margin: 0;">Debit History</h2>
               </div>
             </div>
@@ -3145,7 +3212,8 @@
                 </svg>
                 PDF Settings
               </div>
-              <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 4px; padding-left: 30px;">Customize PDF generation</div>
+              <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 4px; padding-left: 30px;">Customize PDF
+                generation</div>
             </div>
 
             <div onclick="openSettingsTab('backup')" id="tab-backup"
@@ -3217,19 +3285,34 @@
             <!-- PDF Settings Content -->
             <div id="settings-content-pdf" style="display: none;">
               <style>
-                #settings-content-pdf .input-group { display: flex; flex-direction: column; gap: 6px; }
-                #settings-content-pdf .input-group label { font-size: 0.85rem; font-weight: 600; color: #374151; }
-                #settings-content-pdf .input-group input { 
-                    width: 100%; padding: 12px 16px; 
-                    border: 1px solid #d1d5db; border-radius: 8px; 
-                    font-size: 0.95rem; background: #f9fafb; 
-                    transition: all 0.2s; outline: none; 
-                    box-sizing: border-box;
+                #settings-content-pdf .input-group {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
                 }
-                #settings-content-pdf .input-group input:focus { 
-                    border-color: #6366f1; 
-                    box-shadow: 0 0 0 3px rgba(99,102,241,0.15); 
-                    background: #ffffff; 
+
+                #settings-content-pdf .input-group label {
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  color: #374151;
+                }
+
+                #settings-content-pdf .input-group input {
+                  width: 100%;
+                  padding: 12px 16px;
+                  border: 1px solid #d1d5db;
+                  border-radius: 8px;
+                  font-size: 0.95rem;
+                  background: #f9fafb;
+                  transition: all 0.2s;
+                  outline: none;
+                  box-sizing: border-box;
+                }
+
+                #settings-content-pdf .input-group input:focus {
+                  border-color: #6366f1;
+                  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+                  background: #ffffff;
                 }
               </style>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -3237,15 +3320,23 @@
                   <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #111827;">PDF Settings</h3>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                  <button onclick="window.resetPdfSettings()" style="padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; color: #4b5563; cursor: pointer;">Reset</button>
-                  <button onclick="window.savePdfSettings()" style="padding: 8px 16px; border: none; background: #6366f1; color: white; border-radius: 6px; cursor: pointer;">Save Settings</button>
+                  <button onclick="window.resetPdfSettings()"
+                    style="padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; color: #4b5563; cursor: pointer;">Reset</button>
+                  <button onclick="window.savePdfSettings()"
+                    style="padding: 8px 16px; border: none; background: #6366f1; color: white; border-radius: 6px; cursor: pointer;">Save
+                    Settings</button>
                 </div>
               </div>
 
               <!-- Business Information -->
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <div
+                style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <h4 style="margin: 0 0 16px 0; color: #111827; display: flex; align-items: center; gap: 8px;">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                    </path>
+                  </svg>
                   Business Information
                 </h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -3269,45 +3360,84 @@
               </div>
 
               <!-- Branding -->
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <div
+                style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <h4 style="margin: 0 0 16px 0; color: #111827; display: flex; align-items: center; gap: 8px;">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                  </svg>
                   Branding
                 </h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                  
+
                   <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Business Logo</label>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 8px 0;">Appears in PDF header (recommended: 200x100px)</p>
-                    <div style="border: 1px dashed #d1d5db; border-radius: 8px; padding: 24px; text-align: center; background: #f9fafb; position: relative;">
-                      <img id="pdfLogoPreview" style="max-height: 80px; max-width: 100%; display: none; margin: 0 auto 12px auto; object-fit: contain;">
+                    <label
+                      style="display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Business
+                      Logo</label>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 8px 0;">Appears in PDF header
+                      (recommended: 200x100px)</p>
+                    <div
+                      style="border: 1px dashed #d1d5db; border-radius: 8px; padding: 24px; text-align: center; background: #f9fafb; position: relative;">
+                      <img id="pdfLogoPreview"
+                        style="max-height: 80px; max-width: 100%; display: none; margin: 0 auto 12px auto; object-fit: contain;">
                       <div id="pdfLogoPlaceholder">
-                        <svg width="32" height="32" fill="none" stroke="#9ca3af" viewBox="0 0 24 24" style="margin: 0 auto 8px auto; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <svg width="32" height="32" fill="none" stroke="#9ca3af" viewBox="0 0 24 24"
+                          style="margin: 0 auto 8px auto; display: block;">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                          </path>
+                        </svg>
                       </div>
-                      <label style="background: #e5e7eb; color: #374151; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                      <label
+                        style="background: #e5e7eb; color: #374151; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
                         Upload Logo
-                        <input type="file" id="pdfLogoInput" accept="image/*" style="display: none;" onchange="window.handlePdfImageUpload(this, 'pdfLogoPreview', 'pdfLogoPlaceholder')">
+                        <input type="file" id="pdfLogoInput" accept="image/*" style="display: none;"
+                          onchange="window.handlePdfImageUpload(this, 'pdfLogoPreview', 'pdfLogoPlaceholder')">
                       </label>
-                      <button onclick="window.clearPdfImage('pdfLogoPreview', 'pdfLogoPlaceholder', 'pdfLogoInput')" style="display:none; margin-left: 10px; padding: 6px 12px; border-radius: 4px; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;" id="pdfLogoClearBtn">Remove</button>
+                      <button onclick="window.clearPdfImage('pdfLogoPreview', 'pdfLogoPlaceholder', 'pdfLogoInput')"
+                        style="display:none; margin-left: 10px; padding: 6px 12px; border-radius: 4px; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;"
+                        id="pdfLogoClearBtn">Remove</button>
                       <p style="font-size: 0.7rem; color: #9ca3af; margin: 8px 0 0 0;">Max 2MB • JPG, PNG, GIF</p>
                     </div>
                   </div>
 
                   <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Payment QR Code</label>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 8px 0;">Appears in PDF top-right corner</p>
-                    <div style="border: 1px dashed #d1d5db; border-radius: 8px; padding: 24px; text-align: center; background: #f9fafb; position: relative;">
-                      <img id="pdfQRPreview" style="max-height: 80px; max-width: 100%; display: none; margin: 0 auto 12px auto; object-fit: contain;">
+                    <label
+                      style="display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Payment
+                      QR Code</label>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 8px 0;">Appears in PDF top-right corner
+                    </p>
+                    <div
+                      style="border: 1px dashed #d1d5db; border-radius: 8px; padding: 24px; text-align: center; background: #f9fafb; position: relative;">
+                      <img id="pdfQRPreview"
+                        style="max-height: 80px; max-width: 100%; display: none; margin: 0 auto 12px auto; object-fit: contain;">
                       <div id="pdfQRPlaceholder">
-                        <svg width="32" height="32" fill="none" stroke="#9ca3af" viewBox="0 0 24 24" style="margin: 0 auto 8px auto; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        <svg width="32" height="32" fill="none" stroke="#9ca3af" viewBox="0 0 24 24"
+                          style="margin: 0 auto 8px auto; display: block;">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z">
+                          </path>
+                        </svg>
                       </div>
-                      <label style="background: #e5e7eb; color: #374151; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                      <label
+                        style="background: #e5e7eb; color: #374151; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
                         Upload QR Code
-                        <input type="file" id="pdfQRInput" accept="image/*" style="display: none;" onchange="window.handlePdfImageUpload(this, 'pdfQRPreview', 'pdfQRPlaceholder')">
+                        <input type="file" id="pdfQRInput" accept="image/*" style="display: none;"
+                          onchange="window.handlePdfImageUpload(this, 'pdfQRPreview', 'pdfQRPlaceholder')">
                       </label>
-                      <button onclick="window.clearPdfImage('pdfQRPreview', 'pdfQRPlaceholder', 'pdfQRInput')" style="display:none; margin-left: 10px; padding: 6px 12px; border-radius: 4px; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;" id="pdfQRClearBtn">Remove</button>
+                      <button onclick="window.clearPdfImage('pdfQRPreview', 'pdfQRPlaceholder', 'pdfQRInput')"
+                        style="display:none; margin-left: 10px; padding: 6px 12px; border-radius: 4px; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;"
+                        id="pdfQRClearBtn">Remove</button>
                       <p style="font-size: 0.7rem; color: #9ca3af; margin: 8px 0 0 0;">Max 2MB • JPG, PNG, GIF</p>
                     </div>
                   </div>
@@ -3318,7 +3448,11 @@
               <!-- Footer -->
               <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px;">
                 <h4 style="margin: 0 0 16px 0; color: #111827; display: flex; align-items: center; gap: 8px;">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                  </svg>
                   Footer Text
                 </h4>
                 <div class="input-group">
@@ -3531,13 +3665,18 @@
     <div id="pdfTemplate"
       style="width: 700px; padding: 30px; font-family: 'Inter', sans-serif; background: white; color: #111827; box-sizing: border-box;">
       <!-- PDF Dynamic Header -->
-      <div style="border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <div
+        style="border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 16px;">
           <img id="pdfRenderLogo" style="max-height: 80px; max-width: 150px; display: none; object-fit: contain;">
           <div>
-            <h1 id="pdfRenderBusinessName" style="font-size: 26px; font-weight: 800; color: #1f2937; margin: 0; text-transform: uppercase;">Business Name</h1>
-            <p id="pdfRenderBusinessAddress" style="font-size: 14px; color: #4b5563; margin: 4px 0 0 0; max-width: 300px; display: none;"></p>
-            <p id="pdfRenderBusinessContact" style="font-size: 14px; color: #4b5563; margin: 4px 0 0 0; display: none;"></p>
+            <h1 id="pdfRenderBusinessName"
+              style="font-size: 26px; font-weight: 800; color: #1f2937; margin: 0; text-transform: uppercase;">Business
+              Name</h1>
+            <p id="pdfRenderBusinessAddress"
+              style="font-size: 14px; color: #4b5563; margin: 4px 0 0 0; max-width: 300px; display: none;"></p>
+            <p id="pdfRenderBusinessContact" style="font-size: 14px; color: #4b5563; margin: 4px 0 0 0; display: none;">
+            </p>
           </div>
         </div>
         <img id="pdfRenderQR" style="height: 150px; width: 150px; display: none; object-fit: contain;">
@@ -3671,7 +3810,8 @@
       </table>
       <!-- PDF Dynamic Footer -->
       <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #e5e7eb; padding-top: 16px;">
-        <p id="pdfRenderFooter" style="font-size: 13px; color: #6b7280; font-weight: 500; margin: 0; display: none;"></p>
+        <p id="pdfRenderFooter" style="font-size: 13px; color: #6b7280; font-weight: 500; margin: 0; display: none;">
+        </p>
       </div>
     </div>
   </div>
@@ -3743,29 +3883,43 @@
   <!-- End Net Profit Details Modal -->
 
   <!-- Add Expense Modal -->
-  <div class="modal" id="addExpenseModal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: white; border-radius: 12px; width: 500px; max-width: 90vw; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
-      <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+  <div class="modal" id="addExpenseModal"
+    style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div
+      style="background: white; border-radius: 12px; width: 500px; max-width: 90vw; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+      <div
+        style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-top-left-radius: 12px; border-top-right-radius: 12px;">
         <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0;">Add New Expense</h3>
-        <button id="closeAddExpenseModal" style="background: transparent; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer;">&times;</button>
+        <button id="closeAddExpenseModal"
+          style="background: transparent; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer;">&times;</button>
       </div>
       <div style="padding: 24px;">
         <form id="expensesForm" style="display: flex; flex-direction: column; gap: 16px;">
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Expense Name</label>
-            <input type="text" id="expenseName" class="custom-select" style="width: 100%;" placeholder="e.g. Rent, Tea, Internet" required>
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Expense
+              Name</label>
+            <input type="text" id="expenseName" class="custom-select" style="width: 100%;"
+              placeholder="e.g. Rent, Tea, Internet" required>
           </div>
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Amount (₹)</label>
-            <input type="number" id="expenseAmount" class="custom-select" style="width: 100%;" placeholder="0.00" min="0" step="0.01" required>
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Amount
+              (₹)</label>
+            <input type="number" id="expenseAmount" class="custom-select" style="width: 100%;" placeholder="0.00"
+              min="0" step="0.01" required>
           </div>
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Date</label>
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Date</label>
             <input type="date" id="expenseDate" class="custom-select" style="width: 100%;" required>
           </div>
           <div style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 12px;">
-            <button type="button" id="cancelAddExpenseBtn" class="btn btn-outline" style="background: white; border-color: #d1d5db; color: #374151; border-radius: 6px; padding: 10px 16px; font-weight: 600; cursor: pointer;">Cancel</button>
-            <button type="submit" class="btn" style="background-color: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Save Expense</button>
+            <button type="button" id="cancelAddExpenseBtn" class="btn btn-outline"
+              style="background: white; border-color: #d1d5db; color: #374151; border-radius: 6px; padding: 10px 16px; font-weight: 600; cursor: pointer;">Cancel</button>
+            <button type="submit" class="btn"
+              style="background-color: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Save
+              Expense</button>
           </div>
         </form>
       </div>
@@ -3773,29 +3927,50 @@
   </div>
 
   <!-- Add Extra Profit Modal -->
-  <div class="modal" id="addExtraProfitModal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: white; border-radius: 12px; width: 500px; max-width: 90vw; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
-      <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+  <div class="modal" id="addExtraProfitModal"
+    style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div
+      style="background: white; border-radius: 12px; width: 500px; max-width: 90vw; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+      <div
+        style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-top-left-radius: 12px; border-top-right-radius: 12px;">
         <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0;">Add Extra Profit</h3>
-        <button id="closeAddExtraProfitModal" style="background: transparent; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer;">&times;</button>
+        <button id="closeAddExtraProfitModal"
+          style="background: transparent; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer;">&times;</button>
       </div>
       <div style="padding: 24px;">
         <form id="extraProfitForm" style="display: flex; flex-direction: column; gap: 16px;">
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Profit Source Name</label>
-            <input type="text" id="extraProfitName" required placeholder="e.g. Cashback, Referral Bonus" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Profit
+              Source Name</label>
+            <input type="text" id="extraProfitName" required placeholder="e.g. Cashback, Referral Bonus"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';"
+              onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
           </div>
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Amount (₹)</label>
-            <input type="number" id="extraProfitAmount" required placeholder="0.00" min="0" step="0.01" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Amount
+              (₹)</label>
+            <input type="number" id="extraProfitAmount" required placeholder="0.00" min="0" step="0.01"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';"
+              onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
           </div>
           <div>
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Date</label>
-            <input type="date" id="extraProfitDate" required style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';" onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
+            <label
+              style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Date</label>
+            <input type="date" id="extraProfitDate" required
+              style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #f9fafb; outline: none; transition: all 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#6366f1'; this.style.backgroundColor='#ffffff';"
+              onblur="this.style.borderColor='#d1d5db'; this.style.backgroundColor='#f9fafb';">
           </div>
           <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
-            <button type="button" id="cancelExtraProfitBtn" style="padding: 10px 16px; border: 1px solid #d1d5db; background: white; color: #4b5563; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
-            <button type="submit" style="padding: 10px 20px; background: #10b981; color: white; border: none; font-weight: 600; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Save Entry</button>
+            <button type="button" id="cancelExtraProfitBtn"
+              style="padding: 10px 16px; border: 1px solid #d1d5db; background: white; color: #4b5563; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button type="submit"
+              style="padding: 10px 20px; background: #10b981; color: white; border: none; font-weight: 600; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Save
+              Entry</button>
           </div>
         </form>
       </div>
@@ -3876,4 +4051,5 @@
   <script src="reports_logic.js?v=28"></script>
   <script src="script.js"></script>
 </body>
+
 </html>
