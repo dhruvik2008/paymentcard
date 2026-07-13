@@ -2815,8 +2815,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTransactions();
 
             alert('Transaction Submitted Successfully!');
-            wizardSection.style.display = 'none';
-            transactionsSection.style.display = 'block';
+            showSection(transactionsSection);
             breadcrumbCurrent.textContent = 'Transaction Bills';
         }
     });
@@ -3344,11 +3343,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof renderCustomers === 'function') renderCustomers();
         } else if (key === 'cardbills_transactions') {
             transactions = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
+            if (typeof window.renderTransactions === 'function') window.renderTransactions();
             if (typeof window.renderRecentTransactions === 'function') window.renderRecentTransactions();
             if (typeof window.renderAllTransactions === 'function') window.renderAllTransactions();
             if (typeof window.updateDashboardStats === 'function') window.updateDashboardStats();
+            if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
         } else if (key === 'cardbills_ledger_entries') {
             if (typeof window.renderLedgerEntries === 'function') window.renderLedgerEntries();
+            if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
         } else if (key === 'cardbills_expenses') {
             cardbills_expenses = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
             if (typeof window.renderExpenses === 'function') window.renderExpenses();
@@ -4678,6 +4680,9 @@ window.addEventListener('data-synced', (e) => {
         currentPortals = JSON.parse(localStorage.getItem('cardbills_portals')) || [];
         if (typeof window.renderPortals === 'function') window.renderPortals();
     }
+    window.renderPortalBalances = renderPortalBalances;
+    window.renderAllTransactions = renderAllTransactions;
+    window.renderTransactions = renderTransactions;
 });
 
 // Backup & Restore Logic
