@@ -253,6 +253,7 @@
     document.getElementById('cbBillsPending').textContent = `₹${totalBillsPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('cbCustomersOweUs').textContent = `₹${totOweUs.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
   }
+  window.renderCustomerBalancesReport = renderCustomerBalancesReport;
 
   window.processCustomerSettlement = (customerName, type) => {
     const txs = JSON.parse(localStorage.getItem('cardbills_transactions') || '[]');
@@ -415,9 +416,9 @@
        
        localStorage.setItem('cardbills_transactions', JSON.stringify(txs));
        
-       if (typeof renderCustomerBalances === 'function') renderCustomerBalances();
-       if (typeof renderTransactions === 'function') renderTransactions();
-       if (typeof renderAllTransactions === 'function') renderAllTransactions();
+       if (typeof renderCustomerBalancesReport === 'function') renderCustomerBalancesReport();
+       if (typeof window.renderTransactions === 'function') window.renderTransactions();
+       if (typeof window.renderAllTransactions === 'function') window.renderAllTransactions();
        
        alert(`Successfully processed ₹${parseFloat(amountStr).toFixed(2)} from ${customerName}.`);
     } else if (type === 'pay') {
@@ -444,7 +445,7 @@
        });
        localStorage.setItem('cardbills_ledger_entries', JSON.stringify(ledger));
        
-       if (typeof renderCustomerBalances === 'function') renderCustomerBalances();
+       if (typeof renderCustomerBalancesReport === 'function') renderCustomerBalancesReport();
        
        alert(`Successfully recorded payment of ₹${amount.toFixed(2)} to ${customerName}.`);
     }
@@ -542,7 +543,7 @@
     });
 
     const chgProfit = totCustCharges - totPortalCharges;
-    const netProfit = chgProfit - totExpenses + totExtraProfit;
+    const netProfit = chgProfit + totExtraProfit;
 
     document.getElementById('npCustomerCharges').textContent = `₹${totCustCharges.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('npPortalCharges').textContent = `₹${totPortalCharges.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -566,7 +567,7 @@
       const data = dailyData[dateStr];
       const dp = data.cCharges - data.pCharges;
       const dex = data.expenses;
-      const dnet = dp - dex + (data.extraProfit || 0);
+      const dnet = dp + (data.extraProfit || 0);
       
       const displayDate = new Date(dateStr).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
       
@@ -968,7 +969,7 @@ function renderCbViewTable() {
     });
 
     const dailyProfit = dailyCustCharges - dailyPortalCharges;
-    const dailyNet = dailyProfit - dailyExpenses + dailyExtraProfit;
+    const dailyNet = dailyProfit + dailyExtraProfit;
 
     document.getElementById('npDetailProfitCharges').textContent = '₹' + dailyProfit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('npDetailExpenses').textContent = '₹' + dailyExpenses.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
