@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pagination Global State
     let currentTxPage = 1;
     let currentAllTxPage = 1;
+    let currentExpensesPage = 1;
+    let currentExtraProfitPage = 1;
+    let currentUdharPage = 1;
     const ITEMS_PER_PAGE = 20;
 
     const loggedInEmail = localStorage.getItem('cardbills_logged_in_user_email') || 'User';
@@ -199,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bankDomains[bankName]) {
             return `
         <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: white; border: 1px solid #e5e7eb;">
-          <img src="https://www.google.com/s2/favicons?domain=${bankDomains[bankName]}&sz=64" alt="${bankName}" style="width: 100%; height: 100%; object-fit: contain;">
+          <img src="https://www.google.com/s2/favicons?domain=${bankDomains[bankName]}&sz=64" alt="${bankName}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\'font-size:10px; font-weight:bold; color:#1e3a8a;\\'>${bankName.substring(0, 2).toUpperCase()}</span>';">
         </div>
       `;
         }
@@ -3152,9 +3155,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filter and render expenses
         const filteredExpenses = cardbills_expenses.filter(exp => passesFilter(exp.date));
+        filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((exp) => {
+        filteredExpenses.forEach((exp) => {
             totalExpenses += parseFloat(exp.amount) || 0;
+        });
+
+        const totalPages = Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE) || 1;
+        if (currentExpensesPage > totalPages) currentExpensesPage = totalPages;
+        if (currentExpensesPage < 1) currentExpensesPage = 1;
+
+        const startIdx = (currentExpensesPage - 1) * ITEMS_PER_PAGE;
+        const endIdx = startIdx + ITEMS_PER_PAGE;
+        const paginatedExpenses = filteredExpenses.slice(startIdx, endIdx);
+
+        paginatedExpenses.forEach((exp) => {
             const originalIdx = cardbills_expenses.indexOf(exp);
 
             const tr = document.createElement('tr');
@@ -3174,6 +3189,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filteredExpenses.length === 0) {
             expensesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No expenses recorded yet.</td></tr>';
+        }
+
+        const prevBtn = document.getElementById('prevExpensesBtn');
+        const nextBtn = document.getElementById('nextExpensesBtn');
+        const pageIndicator = document.getElementById('expensesPageIndicator');
+
+        if (pageIndicator) pageIndicator.textContent = `Page ${currentExpensesPage} of ${totalPages}`;
+
+        if (prevBtn) {
+            prevBtn.disabled = currentExpensesPage === 1;
+            prevBtn.onclick = () => { if (currentExpensesPage > 1) { currentExpensesPage--; renderExpenses(); } };
+        }
+        if (nextBtn) {
+            nextBtn.disabled = currentExpensesPage === totalPages;
+            nextBtn.onclick = () => { if (currentExpensesPage < totalPages) { currentExpensesPage++; renderExpenses(); } };
         }
 
         // Calculate Profit from transactions for the same date filter
@@ -3283,8 +3313,22 @@ document.addEventListener('DOMContentLoaded', () => {
         extraProfitTableBody.innerHTML = '';
         let totalExtraProfit = 0;
 
-        cardbills_extra_profit.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((ep, idx) => {
+        cardbills_extra_profit.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        cardbills_extra_profit.forEach(ep => {
             totalExtraProfit += parseFloat(ep.amount) || 0;
+        });
+
+        const totalPages = Math.ceil(cardbills_extra_profit.length / ITEMS_PER_PAGE) || 1;
+        if (currentExtraProfitPage > totalPages) currentExtraProfitPage = totalPages;
+        if (currentExtraProfitPage < 1) currentExtraProfitPage = 1;
+
+        const startIdx = (currentExtraProfitPage - 1) * ITEMS_PER_PAGE;
+        const endIdx = startIdx + ITEMS_PER_PAGE;
+        const paginatedEP = cardbills_extra_profit.slice(startIdx, endIdx);
+
+        paginatedEP.forEach((ep) => {
+            const idx = cardbills_extra_profit.indexOf(ep);
 
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #e5e7eb';
@@ -3301,8 +3345,27 @@ document.addEventListener('DOMContentLoaded', () => {
             extraProfitTableBody.appendChild(tr);
         });
 
+        if (cardbills_extra_profit.length === 0) {
+            extraProfitTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No extra profit recorded yet.</td></tr>';
+        }
+
         if (extraProfitTotalValue) {
             extraProfitTotalValue.innerHTML = `<span style="color: #34d399; font-size: 1.5rem;">₹</span> ${totalExtraProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        const prevBtn = document.getElementById('prevExtraProfitBtn');
+        const nextBtn = document.getElementById('nextExtraProfitBtn');
+        const pageIndicator = document.getElementById('extraProfitPageIndicator');
+
+        if (pageIndicator) pageIndicator.textContent = `Page ${currentExtraProfitPage} of ${totalPages}`;
+
+        if (prevBtn) {
+            prevBtn.disabled = currentExtraProfitPage === 1;
+            prevBtn.onclick = () => { if (currentExtraProfitPage > 1) { currentExtraProfitPage--; renderExtraProfit(); } };
+        }
+        if (nextBtn) {
+            nextBtn.disabled = currentExtraProfitPage === totalPages;
+            nextBtn.onclick = () => { if (currentExtraProfitPage < totalPages) { currentExtraProfitPage++; renderExtraProfit(); } };
         }
 
         // Also update dashboard if currently viewing it
@@ -3374,8 +3437,21 @@ document.addEventListener('DOMContentLoaded', () => {
         udharTableBody.innerHTML = '';
         let totalUdhar = 0;
 
-        cardbills_udhar.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((u, idx) => {
+        cardbills_udhar.sort((a, b) => new Date(b.date) - new Date(a.date));
+        cardbills_udhar.forEach(u => {
             totalUdhar += parseFloat(u.amount) || 0;
+        });
+
+        const totalPages = Math.ceil(cardbills_udhar.length / ITEMS_PER_PAGE) || 1;
+        if (currentUdharPage > totalPages) currentUdharPage = totalPages;
+        if (currentUdharPage < 1) currentUdharPage = 1;
+
+        const startIdx = (currentUdharPage - 1) * ITEMS_PER_PAGE;
+        const endIdx = startIdx + ITEMS_PER_PAGE;
+        const paginatedUdhar = cardbills_udhar.slice(startIdx, endIdx);
+
+        paginatedUdhar.forEach((u) => {
+            const idx = cardbills_udhar.indexOf(u);
 
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #e5e7eb';
@@ -3398,6 +3474,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (udharTotalValue) {
             udharTotalValue.innerHTML = `<span style="color: #fbbf24; font-size: 1.5rem;">₹</span> ${totalUdhar.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        const prevBtn = document.getElementById('prevUdharBtn');
+        const nextBtn = document.getElementById('nextUdharBtn');
+        const pageIndicator = document.getElementById('udharPageIndicator');
+
+        if (pageIndicator) pageIndicator.textContent = `Page ${currentUdharPage} of ${totalPages}`;
+
+        if (prevBtn) {
+            prevBtn.disabled = currentUdharPage === 1;
+            prevBtn.onclick = () => { if (currentUdharPage > 1) { currentUdharPage--; renderUdhar(); } };
+        }
+        if (nextBtn) {
+            nextBtn.disabled = currentUdharPage === totalPages;
+            nextBtn.onclick = () => { if (currentUdharPage < totalPages) { currentUdharPage++; renderUdhar(); } };
         }
     };
 
@@ -4792,10 +4883,8 @@ window.addEventListener('data-synced', (e) => {
     if (e.detail === 'cardbills_portals') {
         currentPortals = JSON.parse(localStorage.getItem('cardbills_portals')) || [];
         if (typeof window.renderPortals === 'function') window.renderPortals();
+        if (typeof window.renderPortalBalances === 'function') window.renderPortalBalances();
     }
-    window.renderPortalBalances = renderPortalBalances;
-    window.renderAllTransactions = renderAllTransactions;
-    window.renderTransactions = renderTransactions;
 });
 
 // Backup & Restore Logic
