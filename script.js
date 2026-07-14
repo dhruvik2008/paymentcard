@@ -1125,10 +1125,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 desc: ''
             }];
 
+            if (typeof currentWizardStep !== 'undefined') currentWizardStep = 1;
             if (typeof renderWizardPayments === 'function') renderWizardPayments();
             if (typeof renderWizardDebits === 'function') renderWizardDebits();
-
-            if (typeof currentWizardStep !== 'undefined') currentWizardStep = 1;
             if (typeof updateWizardUI === 'function') updateWizardUI();
 
             wCustomer.value = String(custIdx);
