@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expenses Nav
     const navExpenses = document.getElementById('navExpenses');
     const expensesSection = document.getElementById('expensesSection');
-    
+
     // Extra Profit Nav
     const navExtraProfit = document.getElementById('navExtraProfit');
     const extraProfitSection = document.getElementById('extraProfitSection');
@@ -632,6 +632,26 @@ document.addEventListener('DOMContentLoaded', () => {
             showSection(extraProfitSection);
             breadcrumbCurrent.textContent = 'Extra Profit';
             if (typeof renderExtraProfit === 'function') renderExtraProfit();
+        });
+    }
+
+    const navUdhar = document.getElementById('navUdhar');
+    const udharSection = document.getElementById('udharSection');
+
+    if (navUdhar && udharSection) {
+        navUdhar.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navUdhar.classList.add('active');
+            navLedgerGroup.classList.remove('active');
+            ledgerSubmenu.style.display = 'none';
+            navTransactionsGroup.classList.remove('active');
+            transactionsSubmenu.style.display = 'none';
+            navReportsGroup.classList.remove('active');
+            submenuReports.style.display = 'none';
+            showSection(udharSection);
+            breadcrumbCurrent.textContent = 'Accounts Receivable';
+            if (typeof renderUdhar === 'function') renderUdhar();
         });
     }
 
@@ -3132,11 +3152,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filter and render expenses
         const filteredExpenses = cardbills_expenses.filter(exp => passesFilter(exp.date));
-        
+
         filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((exp) => {
             totalExpenses += parseFloat(exp.amount) || 0;
             const originalIdx = cardbills_expenses.indexOf(exp);
-            
+
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #e5e7eb';
             tr.innerHTML = `
@@ -3151,21 +3171,21 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             expensesTableBody.appendChild(tr);
         });
-        
-        if(filteredExpenses.length === 0) {
+
+        if (filteredExpenses.length === 0) {
             expensesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No expenses recorded yet.</td></tr>';
         }
-        
+
         // Calculate Profit from transactions for the same date filter
         const currentTxs = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
         let totCustCharges = 0;
         let totPortalCharges = 0;
         let txProfit = 0;
-        
+
         currentTxs.forEach(t => {
             let txDateStr = t.date || t.timestamp || '';
             if (!passesFilter(txDateStr)) return;
-            if (t.isSettlement || t.customerName === 'Settlement Account') return; 
+            if (t.isSettlement || t.customerName === 'Settlement Account') return;
 
             if (t.raw && t.raw.debits) {
                 t.raw.debits.forEach(d => {
@@ -3178,7 +3198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-        
+
         let filteredExtraProfit = 0;
         const currentExtraProfits = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
         currentExtraProfits.forEach(ep => {
@@ -3236,7 +3256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.deleteExpense = (idx) => {
-        if(confirm('Are you sure you want to delete this expense?')) {
+        if (confirm('Are you sure you want to delete this expense?')) {
             cardbills_expenses.splice(idx, 1);
             localStorage.setItem('cardbills_expenses', JSON.stringify(cardbills_expenses));
             renderExpenses();
@@ -3265,7 +3285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cardbills_extra_profit.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((ep, idx) => {
             totalExtraProfit += parseFloat(ep.amount) || 0;
-            
+
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #e5e7eb';
             tr.innerHTML = `
@@ -3284,7 +3304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (extraProfitTotalValue) {
             extraProfitTotalValue.innerHTML = `<span style="color: #34d399; font-size: 1.5rem;">₹</span> ${totalExtraProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         }
-        
+
         // Also update dashboard if currently viewing it
         if (typeof window.updateDashboardStats === 'function') {
             window.updateDashboardStats();
@@ -3292,8 +3312,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const closeExtraProfitModalFunc = () => {
-        if(addExtraProfitModal) addExtraProfitModal.style.display = 'none';
-        if(extraProfitForm) extraProfitForm.reset();
+        if (addExtraProfitModal) addExtraProfitModal.style.display = 'none';
+        if (extraProfitForm) extraProfitForm.reset();
     };
 
     if (openAddExtraProfitModalBtn && addExtraProfitModal) {
@@ -3326,11 +3346,102 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.deleteExtraProfit = (idx) => {
-        if(confirm('Are you sure you want to delete this extra profit entry?')) {
+        if (confirm('Are you sure you want to delete this extra profit entry?')) {
             cardbills_extra_profit.splice(idx, 1);
             localStorage.setItem('cardbills_extra_profit', JSON.stringify(cardbills_extra_profit));
             renderExtraProfit();
             showToast('Extra Profit deleted.', 'info');
+        }
+    };
+
+    // ==========================================
+    // Udhar Logic
+    // ==========================================
+    let cardbills_udhar = JSON.parse(localStorage.getItem('cardbills_udhar')) || [];
+    const udharTableBody = document.getElementById('udharTableBody');
+    const udharTotalValue = document.getElementById('udharTotalValue');
+    const openAddUdharModalBtn = document.getElementById('openAddUdharModalBtn');
+    const addUdharModal = document.getElementById('addUdharModal');
+    const closeAddUdharModal = document.getElementById('closeAddUdharModal');
+    const cancelUdharBtn = document.getElementById('cancelUdharBtn');
+    const udharForm = document.getElementById('udharForm');
+    const udharName = document.getElementById('udharName');
+    const udharAmount = document.getElementById('udharAmount');
+    const udharDate = document.getElementById('udharDate');
+
+    window.renderUdhar = () => {
+        if (!udharTableBody) return;
+        udharTableBody.innerHTML = '';
+        let totalUdhar = 0;
+
+        cardbills_udhar.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((u, idx) => {
+            totalUdhar += parseFloat(u.amount) || 0;
+
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #e5e7eb';
+            tr.innerHTML = `
+                <td style="padding: 12px 16px;">${new Date(u.date).toLocaleDateString('en-GB')}</td>
+                <td style="padding: 12px 16px; font-weight: 500; color: #111827;">${u.name || '-'}</td>
+                <td style="padding: 12px 16px; text-align: right; color: #f59e0b; font-weight: 600;">₹${parseFloat(u.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 12px 16px; text-align: center;">
+                    <button onclick="deleteUdhar(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+            udharTableBody.appendChild(tr);
+        });
+
+        if (cardbills_udhar.length === 0) {
+            udharTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No receivable entries yet.</td></tr>';
+        }
+
+        if (udharTotalValue) {
+            udharTotalValue.innerHTML = `<span style="color: #fbbf24; font-size: 1.5rem;">₹</span> ${totalUdhar.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+    };
+
+    const closeUdharModalFunc = () => {
+        if (addUdharModal) addUdharModal.style.display = 'none';
+        if (udharForm) udharForm.reset();
+    };
+
+    if (openAddUdharModalBtn && addUdharModal) {
+        openAddUdharModalBtn.addEventListener('click', () => {
+            if (udharName) udharName.value = '';
+            if (udharAmount) udharAmount.value = '';
+            if (udharDate) udharDate.value = new Date().toISOString().split('T')[0];
+            addUdharModal.style.display = 'flex';
+        });
+    }
+
+    if (closeAddUdharModal) closeAddUdharModal.addEventListener('click', closeUdharModalFunc);
+    if (cancelUdharBtn) cancelUdharBtn.addEventListener('click', closeUdharModalFunc);
+
+    if (udharForm) {
+        udharForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newU = {
+                id: 'udh_' + Date.now(),
+                name: udharName.value.trim(),
+                amount: parseFloat(udharAmount.value) || 0,
+                date: udharDate.value,
+                timestamp: Date.now()
+            };
+            cardbills_udhar.push(newU);
+            localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
+            renderUdhar();
+            if (typeof showToast === 'function') showToast('Receivable entry added successfully!', 'success');
+            closeUdharModalFunc();
+        });
+    }
+
+    window.deleteUdhar = (idx) => {
+        if (confirm('Are you sure you want to delete this receivable entry?')) {
+            cardbills_udhar.splice(idx, 1);
+            localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
+            renderUdhar();
+            if (typeof showToast === 'function') showToast('Receivable entry deleted.', 'info');
         }
     };
 
@@ -3356,6 +3467,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (key === 'cardbills_extra_profit') {
             cardbills_extra_profit = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
             if (typeof window.renderExtraProfit === 'function') window.renderExtraProfit();
+        } else if (key === 'cardbills_udhar') {
+            cardbills_udhar = JSON.parse(localStorage.getItem('cardbills_udhar')) || [];
+            if (typeof window.renderUdhar === 'function') window.renderUdhar();
         }
     });
 
@@ -3374,7 +3488,7 @@ let currentExpenseFilter = 'monthly';
 
 window.setExpenseFilter = (filter) => {
     currentExpenseFilter = filter;
-    
+
     // Update active button styling
     ['Today', 'Monthly', 'Yearly', 'Custom'].forEach(f => {
         const btn = document.getElementById('expFilter' + f);
@@ -4186,7 +4300,7 @@ const renderDashboard = () => {
     });
 
     // chgProfit is already calculated inside the loop
-    
+
     // Calculate total extra profit
     let totExtraProfit = 0;
     const eps = JSON.parse(localStorage.getItem('cardbills_extra_profit')) || [];
