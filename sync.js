@@ -4,7 +4,7 @@ function encodeEmail(email) {
 }
 
 const originalSetItem = localStorage.setItem.bind(localStorage);
-const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings', 'cardbills_expenses', 'cardbills_extra_profit'];
+const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings', 'cardbills_expenses', 'cardbills_extra_profit', 'cardbills_udhar'];
 const firebaseSyncedKeys = new Set(); // Track which keys have finished initial sync
 
 localStorage.setItem = function (key, value) {
