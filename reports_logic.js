@@ -88,6 +88,7 @@
     let totalBillsPending = 0;
 
     cbGrid.innerHTML = '';
+    const cardsData = [];
     
     customers.forEach(c => {
       let chargesRecv = 0;
@@ -191,6 +192,16 @@
       totalLedgerPending += ledgerNet;
       totalBillsPending += currentBills;
 
+      cardsData.push({
+        c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay
+      });
+    });
+
+    // Sort by netCollect descending (highest to receive first, lowest or negative last)
+    cardsData.sort((a, b) => b.netCollect - a.netCollect);
+
+    cardsData.forEach(data => {
+      const { c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay } = data;
       const initials = (c.name || 'U').substring(0, 2).toUpperCase();
       const card = document.createElement('div');
       card.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; overflow: hidden; display: flex; flex-direction: column;';
