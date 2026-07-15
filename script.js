@@ -3421,7 +3421,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Udhar Logic
     // ==========================================
     let cardbills_udhar = JSON.parse(localStorage.getItem('cardbills_udhar')) || [];
-    const udharTableBody = document.getElementById('udharTableBody');
+    let udharNeedsSave = false;
+    cardbills_udhar.forEach((u, index) => {
+        if (!u.id) {
+            u.id = 'udh_legacy_' + Date.now() + '_' + index;
+            udharNeedsSave = true;
+        }
+    });
+    if (udharNeedsSave) {
+        localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
+    }
     const udharTotalValue = document.getElementById('udharTotalValue');
     const openAddUdharModalBtn = document.getElementById('openAddUdharModalBtn');
     const addUdharModal = document.getElementById('addUdharModal');
@@ -3432,45 +3441,93 @@ document.addEventListener('DOMContentLoaded', () => {
     const udharAmount = document.getElementById('udharAmount');
     const udharDate = document.getElementById('udharDate');
 
+    // Avatar color palette
+    const udharAvatarColors = [
+        { bg: '#dbeafe', text: '#1d4ed8' },
+        { bg: '#dcfce7', text: '#166534' },
+        { bg: '#fce7f3', text: '#9d174d' },
+        { bg: '#fef3c7', text: '#92400e' },
+        { bg: '#ede9fe', text: '#5b21b6' },
+        { bg: '#ffedd5', text: '#9a3412' },
+        { bg: '#e0f2fe', text: '#0c4a6e' },
+        { bg: '#f3e8ff', text: '#7e22ce' },
+    ];
+
+    let editUdharId = null;
+
     window.renderUdhar = () => {
-        if (!udharTableBody) return;
-        udharTableBody.innerHTML = '';
+        const udharGrid = document.getElementById('udharGrid');
+        if (!udharGrid) return;
+        udharGrid.innerHTML = '';
         let totalUdhar = 0;
 
-        cardbills_udhar.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const groupsMap = {};
         cardbills_udhar.forEach(u => {
-            totalUdhar += parseFloat(u.amount) || 0;
+            const amt = parseFloat(u.amount) || 0;
+            totalUdhar += amt;
+            const key = (u.name || 'Unknown').trim().toLowerCase();
+            if (!groupsMap[key]) {
+                groupsMap[key] = {
+                    name: u.name || 'Unknown',
+                    totalAmount: 0,
+                    count: 0,
+                    lastDate: u.date
+                };
+            }
+            groupsMap[key].totalAmount += amt;
+            groupsMap[key].count += 1;
+            if (new Date(u.date) > new Date(groupsMap[key].lastDate)) {
+                groupsMap[key].lastDate = u.date;
+            }
         });
 
-        const totalPages = Math.ceil(cardbills_udhar.length / ITEMS_PER_PAGE) || 1;
+        const groupedList = Object.values(groupsMap).sort((a, b) => b.totalAmount - a.totalAmount);
+
+        const totalPages = Math.ceil(groupedList.length / ITEMS_PER_PAGE) || 1;
         if (currentUdharPage > totalPages) currentUdharPage = totalPages;
         if (currentUdharPage < 1) currentUdharPage = 1;
 
         const startIdx = (currentUdharPage - 1) * ITEMS_PER_PAGE;
         const endIdx = startIdx + ITEMS_PER_PAGE;
-        const paginatedUdhar = cardbills_udhar.slice(startIdx, endIdx);
+        const paginatedGroups = groupedList.slice(startIdx, endIdx);
 
-        paginatedUdhar.forEach((u) => {
-            const idx = cardbills_udhar.indexOf(u);
-
-            const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid #e5e7eb';
-            tr.innerHTML = `
-                <td style="padding: 12px 16px;">${new Date(u.date).toLocaleDateString('en-GB')}</td>
-                <td style="padding: 12px 16px; font-weight: 500; color: #111827;">${u.name || '-'}</td>
-                <td style="padding: 12px 16px; text-align: right; color: #f59e0b; font-weight: 600;">₹${parseFloat(u.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                <td style="padding: 12px 16px; text-align: center;">
-                    <button onclick="deleteUdhar(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                </td>
-            `;
-            udharTableBody.appendChild(tr);
-        });
-
-        if (cardbills_udhar.length === 0) {
-            udharTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280;">No receivable entries yet.</td></tr>';
+        if (groupedList.length === 0) {
+            udharGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#6b7280;font-size:1rem;">No receivable entries yet.</div>';
         }
+
+        paginatedGroups.forEach((group) => {
+            const name = group.name;
+            const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+            const colorSet = udharAvatarColors[(name.charCodeAt(0) || 0) % udharAvatarColors.length];
+            const amount = parseFloat(group.totalAmount || 0);
+            const dateStr = new Date(group.lastDate).toLocaleDateString('en-GB');
+
+            const card = document.createElement('div');
+            card.style.cssText = 'background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); border: 1px solid #f3f4f6; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.2s, transform 0.2s; cursor: pointer;';
+            card.onmouseover = () => { card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; card.style.transform = 'translateY(-2px)'; };
+            card.onmouseout = () => { card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)'; card.style.transform = 'translateY(0)'; };
+            card.onclick = () => openUdharDetails(name);
+            
+            card.innerHTML = `
+                <div style="padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #f3f4f6;">
+                    <div style="width: 46px; height: 46px; border-radius: 50%; background: ${colorSet.bg}; color: ${colorSet.text}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; letter-spacing: 0.5px;">
+                        ${initials}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; color: #1e1b4b; font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name.toUpperCase()}</div>
+                        <div style="color: #9ca3af; font-size: 0.78rem; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Last entry: ${dateStr} &bull; ${group.count} ${group.count === 1 ? 'entry' : 'entries'}
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 16px 20px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); text-align: center;">
+                    <div style="font-size: 0.72rem; color: #d97706; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;">Total Receivable</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #b45309;">₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                </div>
+            `;
+            udharGrid.appendChild(card);
+        });
 
         if (udharTotalValue) {
             udharTotalValue.innerHTML = `<span style="color: #fbbf24; font-size: 1.5rem;">₹</span> ${totalUdhar.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -3492,13 +3549,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.openUdharDetails = (name) => {
+        const detailsModal = document.getElementById('udharDetailsModal');
+        const titleEl = document.getElementById('udharDetailsModalTitle');
+        const containerEl = document.getElementById('udharDetailsContainer');
+        if (!detailsModal || !titleEl || !containerEl) return;
+
+        titleEl.textContent = `Receivables: ${name.toUpperCase()}`;
+        containerEl.innerHTML = '';
+
+        const personEntries = cardbills_udhar.filter(u => (u.name || 'Unknown').trim().toLowerCase() === name.trim().toLowerCase());
+        personEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (personEntries.length === 0) {
+            containerEl.innerHTML = '<div style="text-align:center;color:#6b7280;padding:20px;">No entries found.</div>';
+            return;
+        }
+
+        personEntries.forEach(entry => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02); transition: all 0.2s; cursor: default;';
+            row.onmouseover = () => { row.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)'; row.style.transform = 'translateY(-1px)'; row.style.borderColor = '#d1d5db'; };
+            row.onmouseout = () => { row.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02)'; row.style.transform = 'none'; row.style.borderColor = '#e5e7eb'; };
+            
+            const amt = parseFloat(entry.amount) || 0;
+            const dateStr = new Date(entry.date).toLocaleDateString('en-GB');
+            
+            row.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 42px; height: 42px; background: #fff7ed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ea580c;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; color: #1f2937; font-size: 1.1rem; letter-spacing: -0.01em;">₹${amt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 2px; font-weight: 500;">${dateStr}</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="editUdhar('${entry.id}')" title="Edit Entry" style="background: white; border: 1px solid #e5e7eb; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f3f4f6'; this.style.color='#111827';" onmouseout="this.style.background='white'; this.style.color='#6b7280';">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <button onclick="deleteUdhar('${entry.id}')" title="Delete Entry" style="background: white; border: 1px solid #fee2e2; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; color: #ef4444; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#fef2f2'; this.style.color='#b91c1c';" onmouseout="this.style.background='white'; this.style.color='#ef4444';">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            `;
+            containerEl.appendChild(row);
+        });
+
+        detailsModal.style.display = 'flex';
+    };
+
+    const closeUdharDetailsModalFunc = () => {
+        const detailsModal = document.getElementById('udharDetailsModal');
+        if (detailsModal) detailsModal.style.display = 'none';
+    };
+
+    const closeUdharDetailsBtn = document.getElementById('closeUdharDetailsModal');
+    if (closeUdharDetailsBtn) closeUdharDetailsBtn.addEventListener('click', closeUdharDetailsModalFunc);
+
+    window.editUdhar = (id) => {
+        const entry = cardbills_udhar.find(u => u.id === id);
+        if (!entry) return;
+        
+        editUdharId = id;
+        if (udharName) udharName.value = entry.name || '';
+        if (udharAmount) udharAmount.value = entry.amount || '';
+        if (udharDate) udharDate.value = entry.date || '';
+        
+        const modalTitle = addUdharModal.querySelector('h3');
+        if (modalTitle) modalTitle.textContent = 'Edit Receivable Entry';
+        
+        closeUdharDetailsModalFunc();
+        if (addUdharModal) addUdharModal.style.display = 'flex';
+    };
+
+    window.deleteUdhar = (id) => {
+        if (confirm('Are you sure you want to delete this receivable entry?')) {
+            const idx = cardbills_udhar.findIndex(u => u.id === id);
+            if (idx > -1) {
+                const name = cardbills_udhar[idx].name;
+                cardbills_udhar.splice(idx, 1);
+                localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
+                renderUdhar();
+                
+                // If details modal is open, refresh it or close if empty
+                const detailsModal = document.getElementById('udharDetailsModal');
+                if (detailsModal && detailsModal.style.display === 'flex') {
+                    const remaining = cardbills_udhar.filter(u => (u.name || '').trim().toLowerCase() === name.trim().toLowerCase());
+                    if (remaining.length > 0) {
+                        openUdharDetails(name);
+                    } else {
+                        closeUdharDetailsModalFunc();
+                    }
+                }
+                
+                showToast('Entry deleted.', 'info');
+            }
+        }
+    };
+
     const closeUdharModalFunc = () => {
         if (addUdharModal) addUdharModal.style.display = 'none';
         if (udharForm) udharForm.reset();
+        editUdharId = null;
     };
 
     if (openAddUdharModalBtn && addUdharModal) {
         openAddUdharModalBtn.addEventListener('click', () => {
+            editUdharId = null;
+            const modalTitle = addUdharModal.querySelector('h3');
+            if (modalTitle) modalTitle.textContent = 'Add Receivable Entry';
             if (udharName) udharName.value = '';
             if (udharAmount) udharAmount.value = '';
             if (udharDate) udharDate.value = new Date().toISOString().split('T')[0];
@@ -3512,29 +3673,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (udharForm) {
         udharForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newU = {
-                id: 'udh_' + Date.now(),
-                name: udharName.value.trim(),
-                amount: parseFloat(udharAmount.value) || 0,
-                date: udharDate.value,
-                timestamp: Date.now()
-            };
-            cardbills_udhar.push(newU);
+            
+            if (editUdharId) {
+                const idx = cardbills_udhar.findIndex(u => u.id === editUdharId);
+                if (idx > -1) {
+                    cardbills_udhar[idx].name = udharName.value.trim();
+                    cardbills_udhar[idx].amount = parseFloat(udharAmount.value) || 0;
+                    cardbills_udhar[idx].date = udharDate.value;
+                    cardbills_udhar[idx].timestamp = Date.now();
+                }
+                showToast('Entry updated successfully!', 'success');
+            } else {
+                const newU = {
+                    id: 'udh_' + Date.now(),
+                    name: udharName.value.trim(),
+                    amount: parseFloat(udharAmount.value) || 0,
+                    date: udharDate.value,
+                    timestamp: Date.now()
+                };
+                cardbills_udhar.push(newU);
+                if (typeof showToast === 'function') showToast('Receivable entry added successfully!', 'success');
+            }
+            
             localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
             renderUdhar();
-            if (typeof showToast === 'function') showToast('Receivable entry added successfully!', 'success');
+            
+            // If details modal is open (meaning we edited from there), refresh it
+            const detailsModal = document.getElementById('udharDetailsModal');
+            if (detailsModal && detailsModal.style.display === 'flex') {
+                 openUdharDetails(udharName.value.trim());
+            }
+            
             closeUdharModalFunc();
         });
     }
-
-    window.deleteUdhar = (idx) => {
-        if (confirm('Are you sure you want to delete this receivable entry?')) {
-            cardbills_udhar.splice(idx, 1);
-            localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
-            renderUdhar();
-            if (typeof showToast === 'function') showToast('Receivable entry deleted.', 'info');
-        }
-    };
 
     // Sync Firebase Data for encapsulated variables
     window.addEventListener('data-synced', (e) => {
