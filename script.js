@@ -2688,8 +2688,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentWizardStep === 4) {
             const custIndex = wizardCustomer.value;
             const cardIndex = wizardCard.value;
+            if (custIndex === '' || cardIndex === '') return;
             const customer = [...customers].sort((a, b) => a.name.localeCompare(b.name))[custIndex];
-            const card = customer.cards[cardIndex];
+            const card = customer && customer.cards ? customer.cards[cardIndex] : null;
+            if (!customer || !card) return;
 
             const bill = getWizardBillTotal();
             const paid = getWizardPaidTotal();
@@ -2740,6 +2742,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createEntryBtn.addEventListener('click', () => {
         window.editingTransactionIndex = null;
+        currentWizardStep = 1;
         populateWizardCustomers();
         wizardCard.disabled = true;
         wizardCustomer.value = '';
@@ -2760,7 +2763,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderWizardPayments();
         renderWizardDebits();
 
-        currentWizardStep = 1;
         updateWizardUI();
         showSection(wizardSection);
         breadcrumbCurrent.textContent = 'Transaction Bills / Unified Entry';
