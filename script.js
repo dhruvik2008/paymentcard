@@ -2224,7 +2224,8 @@ document.addEventListener('DOMContentLoaded', () => {
           ${(() => {
                     const billAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const paidAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-                    const pendingAmt = Math.max(0, billAmt - paidAmt);
+                    const debitAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
+                    const pendingAmt = Math.max(0, billAmt - paidAmt) + Math.max(0, paidAmt - debitAmt);
                     return `
               <div style="display:flex;flex-direction:column;gap:2px;font-size:0.8rem;">
                 <div style="display:flex;justify-content:space-between;gap:12px;">
@@ -2248,7 +2249,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ${(() => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-                    const currentPending = Math.max(0, bAmt - pAmt);
+                    const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
+                    const currentPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
                     return `<span style="font-weight: 600; color: ${currentPending > 0 ? '#f97316' : '#10b981'};">
             ₹${currentPending.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>`;
@@ -2258,7 +2260,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ${(() => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
-                    const customerPending = Math.max(0, bAmt - pAmt);
+                    const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
+                    const customerPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
 
                     let currentStatus = customerPending <= 0 ? 'Fully Debited' : 'Pending';
 
@@ -2680,7 +2683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('debitSummaryTotal').textContent = `₹${bill.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         document.getElementById('debitSummaryDebited').textContent = `₹${debit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-        document.getElementById('debitSummaryPending').textContent = `₹${pending.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('debitSummaryPending').textContent = `₹${Math.max(0, bill - debit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
         if (currentWizardStep === 4) {
             const custIndex = wizardCustomer.value;
