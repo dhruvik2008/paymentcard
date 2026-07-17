@@ -925,7 +925,9 @@ function renderCbViewTable() {
     let entryCount = 0;
 
     txs.forEach(t => {
-      if (t.date === dateStr) {
+      const td = new Date(t.date);
+      const dKey = isNaN(td) ? t.date : `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+      if (dKey === dateStr) {
         if (t.raw && t.raw.debits) {
           t.raw.debits.forEach(d => {
             let amt = parseFloat(d.amount) || 0;
@@ -940,17 +942,19 @@ function renderCbViewTable() {
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #f3f4f6';
             
-            const cardDetails = `****${t.cardSuffix || '0000'} <br><span style="font-size:0.75rem;color:#6b7280;">${t.bank || 'Unknown'}</span>`;
-            const profitColor = profit >= 0 ? '#16a34a' : '#ef4444';
+            const cardDetails = `<div style="font-weight: 600; color: #374151;">****${t.cardSuffix || '0000'}</div><div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;">${t.bank || 'Unknown'}</div>`;
+            const profitColor = profit >= 0 ? '#22c55e' : '#ef4444';
 
             tr.innerHTML = `
-              <td style="padding: 12px 16px; font-weight: 600; color: #1f2937;">${t.customerName || 'Unknown'}</td>
-              <td style="padding: 12px 16px; color: #4b5563; font-size: 0.85rem;">${cardDetails}</td>
-              <td style="padding: 12px 16px;"><span style="background: #eff6ff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: #2563eb;">${d.portal || 'Unassigned'}</span></td>
-              <td style="padding: 12px 16px; text-align: right; font-weight: 600; color: #1f2937;">₹${amt.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-              <td style="padding: 12px 16px; text-align: right; color: #3b82f6; font-weight: 600;">₹${cFee.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-              <td style="padding: 12px 16px; text-align: right; color: #f59e0b; font-weight: 600;">₹${pChg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-              <td style="padding: 12px 16px; text-align: right; color: ${profitColor}; font-weight: 600;">₹${profit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td style="padding: 16px 20px; font-weight: 700; color: #111827; font-size: 0.8rem; border-bottom: 1px solid #e5e7eb;">${(t.customerName || 'Unknown').toUpperCase()}</td>
+              <td style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">${cardDetails}</td>
+              <td style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+                <span style="background: #e0f2fe; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #0284c7; display: inline-block;">${(d.portal || 'Unassigned').toUpperCase()}</span>
+              </td>
+              <td style="padding: 16px 20px; text-align: right; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">₹${amt.toLocaleString('en-IN')}</td>
+              <td style="padding: 16px 20px; text-align: right; color: #3b82f6; font-weight: 700; border-bottom: 1px solid #e5e7eb;">₹${cFee.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td style="padding: 16px 20px; text-align: right; color: #f59e0b; font-weight: 700; border-bottom: 1px solid #e5e7eb;">₹${pChg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td style="padding: 16px 20px; text-align: right; color: ${profitColor}; font-weight: 700; border-bottom: 1px solid #e5e7eb;">₹${profit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             `;
             npDetailTableBody.appendChild(tr);
           });
@@ -959,14 +963,18 @@ function renderCbViewTable() {
     });
 
     ledger.forEach(l => {
-      if (l.date === dateStr && l.type === 'expense') {
+      const ld = new Date(l.date);
+      const dKey = isNaN(ld) ? l.date : `${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
+      if (dKey === dateStr && (l.type || '').toLowerCase() === 'expense') {
         dailyExpenses += parseFloat(l.amount) || 0;
       }
     });
 
     const exps = JSON.parse(localStorage.getItem('cardbills_expenses') || '[]');
     exps.forEach(exp => {
-      if (exp.date === dateStr) {
+      const ed = new Date(exp.date);
+      const dKey = isNaN(ed) ? exp.date : `${ed.getFullYear()}-${String(ed.getMonth()+1).padStart(2,'0')}-${String(ed.getDate()).padStart(2,'0')}`;
+      if (dKey === dateStr) {
         dailyExpenses += parseFloat(exp.amount) || 0;
       }
     });
@@ -974,7 +982,9 @@ function renderCbViewTable() {
     let dailyExtraProfit = 0;
     const extraProfits = JSON.parse(localStorage.getItem('cardbills_extra_profit') || '[]');
     extraProfits.forEach(ep => {
-      if (ep.date === dateStr) {
+      const ed = new Date(ep.date);
+      const dKey = isNaN(ed) ? ep.date : `${ed.getFullYear()}-${String(ed.getMonth()+1).padStart(2,'0')}-${String(ed.getDate()).padStart(2,'0')}`;
+      if (dKey === dateStr) {
         dailyExtraProfit += parseFloat(ep.amount) || 0;
       }
     });
@@ -990,13 +1000,11 @@ function renderCbViewTable() {
     
     netElem.textContent = (dailyNet >= 0 ? '+' : '-') + '₹' + Math.abs(dailyNet).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (dailyNet >= 0) {
-      netElem.style.color = '#15803d';
-      netContainer.style.background = '#f0fdf4';
-      netContainer.style.borderColor = '#bbf7d0';
+      netElem.style.color = '#22c55e';
+      netContainer.style.borderColor = '#dcfce7';
     } else {
-      netElem.style.color = '#b91c1c';
-      netContainer.style.background = '#fef2f2';
-      netContainer.style.borderColor = '#fecaca';
+      netElem.style.color = '#ef4444';
+      netContainer.style.borderColor = '#fee2e2';
     }
 
     document.getElementById('npDetailSubTitle').textContent = `Profit Entries (${entryCount})`;
