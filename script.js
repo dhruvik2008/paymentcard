@@ -1160,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Fix flex to block just in case
             document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
-            document.getElementById('wizardSection').style.display = 'block';
+            document.getElementById('wizardSection').style.display = 'flex';
             document.getElementById('breadcrumbCurrent').textContent = 'Transaction Bills / Unified Entry';
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         } catch (e) {
@@ -1265,13 +1265,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backToPortalsBtn) {
         backToPortalsBtn.addEventListener('click', () => {
             portalDetailSection.style.display = 'none';
-            portalBalancesSection.style.display = 'block';
+            portalBalancesSection.style.display = 'flex';
         });
     }
 
     window.showPortalDetails = (portalName) => {
         portalBalancesSection.style.display = 'none';
-        portalDetailSection.style.display = 'block';
+        portalDetailSection.style.display = 'flex';
+        document.getElementById('breadcrumbCurrent').textContent = `Portal Balances / ${portalName}`;
 
         document.getElementById('portalDetailTitle').textContent = portalName.toUpperCase();
 
