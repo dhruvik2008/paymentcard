@@ -41,8 +41,44 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'ALPESH RATHOD' },
         { name: 'Alpesh solanki' },
         { name: 'Amit Gohel' },
-        { name: 'Anil Bhan' }
     ];
+
+    // MIGRATION: Automatically delete any duplicate customers by name (case-insensitive) and merge their cards
+    let hasDuplicates = false;
+    const uniqueCustomers = [];
+    const seenNames = new Map(); // map lowerName to index in uniqueCustomers
+    
+    customers.forEach(c => {
+        const lowerName = (c.name || '').trim().toLowerCase();
+        if (!seenNames.has(lowerName)) {
+            seenNames.set(lowerName, uniqueCustomers.length);
+            uniqueCustomers.push(c);
+        } else {
+            hasDuplicates = true;
+            // Merge cards if the duplicate has cards
+            if (c.cards && c.cards.length > 0) {
+                const existingIdx = seenNames.get(lowerName);
+                const existing = uniqueCustomers[existingIdx];
+                if (!existing.cards) existing.cards = [];
+                // Only push cards that don't already exist (by last 4 digits & bank)
+                c.cards.forEach(newCard => {
+                    const isCardDuplicate = existing.cards.some(ec => ec.bank === newCard.bank && ec.last === newCard.last);
+                    if (!isCardDuplicate) {
+                        existing.cards.push(newCard);
+                    }
+                });
+            }
+        }
+    });
+
+    if (hasDuplicates) {
+        customers = uniqueCustomers;
+        localStorage.setItem('cardbills_customers', JSON.stringify(customers));
+        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
+            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
+        }
+    }
 
     // Function to render customers
     const renderCustomers = () => {
@@ -456,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Add Card
     `;
         renderAddedCards();
+        document.getElementById('saveBtn').disabled = false;
     };
 
     addCustomerBtn.addEventListener('click', openDrawer);
@@ -464,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save Customer
     saveBtn.addEventListener('click', () => {
+        saveBtn.disabled = true;
         const nameInput = document.getElementById('customerName');
         const phoneInput = document.getElementById('customerPhone');
         const drawerContent = document.querySelector('.drawer-content');
@@ -478,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!phoneInput.value.trim()) phoneInput.style.border = '1px solid #ef4444';
             alert('Please fill in the required fields (Customer Name and Phone Number) at the top.');
             if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+            saveBtn.disabled = false;
             return;
         }
 
@@ -485,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             phoneInput.style.border = '1px solid #ef4444';
             alert('Phone Number must be exactly 10 digits.');
             if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+            saveBtn.disabled = false;
             return;
         }
 
@@ -494,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
             refPhoneInput.style.border = '1px solid #ef4444';
             alert('Reference Contact Number must be exactly 10 digits.');
             if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+            saveBtn.disabled = false;
             return;
         }
 
@@ -507,6 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cardFirst || cardLast || cardBank || cardDueDate || cardType) {
             if (!cardFirst || !cardLast || !cardBank || !cardDueDate || !cardType) {
                 alert('You started adding a credit card. Please complete all its details before saving, or clear the fields if you changed your mind.');
+                saveBtn.disabled = false;
                 return;
             }
 
@@ -527,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (nameExists) {
                 alert('A customer with this name already exists. Please use a different name or edit the existing customer.');
                 if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+                saveBtn.disabled = false;
                 return;
             }
         }
