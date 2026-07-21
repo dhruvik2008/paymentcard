@@ -4599,9 +4599,7 @@ const renderDashboard = () => {
     const netProfit = chgProfit;
 
     const formatValue = (num) => {
-        if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
-        if (num >= 1000) return (num / 1000).toFixed(1) + ' K';
-        return num.toFixed(2);
+        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const dbNetProfit = document.getElementById('dbNetProfit');
