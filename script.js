@@ -518,6 +518,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Add to array
+        const newName = nameInput.value.trim();
+        
+        if (editingCustomerIndex === -1) {
+            // Check for duplicate name when adding a new customer
+            const nameExists = customers.some(c => c.name.toLowerCase() === newName.toLowerCase());
+            if (nameExists) {
+                alert('A customer with this name already exists. Please use a different name or edit the existing customer.');
+                if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+        }
         const newCustomer = {
             name: nameInput.value.trim(),
             email: document.getElementById('customerEmail').value.trim(),
@@ -947,6 +958,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pendingAmount <= 0) {
                 stat = 'Fully Debited';
                 statCol = '#10b981';
+                tx.isSettled = true; // Auto-migrate existing fully paid transactions to isSettled
             }
 
             tx.status = stat;
@@ -2226,7 +2238,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const billAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const paidAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const debitAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    const pendingAmt = Math.max(0, billAmt - paidAmt) + Math.max(0, paidAmt - debitAmt);
+                    let pendingAmt = Math.max(0, billAmt - paidAmt) + Math.max(0, paidAmt - debitAmt);
+                    if (tx.isSettled) pendingAmt = 0;
                     return `
               <div style="display:flex;flex-direction:column;gap:2px;font-size:0.8rem;">
                 <div style="display:flex;justify-content:space-between;gap:12px;">
@@ -2251,7 +2264,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    const currentPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    let currentPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    if (tx.isSettled) currentPending = 0;
                     return `<span style="font-weight: 600; color: ${currentPending > 0 ? '#f97316' : '#10b981'};">
             ₹${currentPending.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>`;
@@ -2262,7 +2276,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    const customerPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    let customerPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    if (tx.isSettled) customerPending = 0;
 
                     let currentStatus = customerPending <= 0 ? 'Fully Debited' : 'Pending';
 
@@ -4527,8 +4542,9 @@ const renderDashboard = () => {
                     totPortalCharges += pChg;
                     chgProfit += (parseFloat(d.profit) || (cFee - pChg));
                     totTurnover += amt;
-                    if (d.chargesStatus === 'Pending') {
-                        pendingCharges += cFee;
+                    if (d.chargesStatus === 'Pending' || d.chargesStatus === 'Partially Paid') {
+                        let paidAmt = parseFloat(d.paidAmount) || 0;
+                        pendingCharges += Math.max(0, cFee - paidAmt);
                     }
                 }
             });
