@@ -309,7 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAddedCards();
 
         viewCustomerDrawer.classList.remove('active');
-        openDrawer();
+        addCustomerDrawer.classList.add('active');
+        drawerOverlay.classList.add('active');
     });
 
     // Delete Customer
