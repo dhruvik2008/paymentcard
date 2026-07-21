@@ -74,14 +74,25 @@
 
     const search = (cbSearchInput.value || '').toLowerCase();
     
+    // Deduplicate customers by name (case-insensitive) to avoid duplicate cards
+    let uniqueCustomers = [];
+    const seenNames = new Set();
+    customers.forEach(c => {
+       const lowerName = (c.name || '').toLowerCase().trim();
+       if (lowerName && !seenNames.has(lowerName)) {
+           seenNames.add(lowerName);
+           uniqueCustomers.push(c);
+       }
+    });
+
     if (search) {
-      customers = customers.filter(c => 
+      uniqueCustomers = uniqueCustomers.filter(c => 
         (c.name || '').toLowerCase().includes(search) || 
         (c.phone || '').toLowerCase().includes(search)
       );
     }
     
-    document.getElementById('cbTotalCustomersSubtitle').textContent = `${customers.length} total customers`;
+    document.getElementById('cbTotalCustomersSubtitle').textContent = `${uniqueCustomers.length} total customers`;
 
     let totalChargesPending = 0;
     let totalLedgerPending = 0;
@@ -90,7 +101,7 @@
     cbGrid.innerHTML = '';
     const cardsData = [];
     
-    customers.forEach(c => {
+    uniqueCustomers.forEach(c => {
       let chargesRecv = 0;
       let chargesPay = 0;
       let billsRecv = 0;
@@ -365,6 +376,7 @@
          
          if (txs[p.index].pendingAmount === 0) {
            txs[p.index].status = 'Fully Debited';
+           txs[p.index].isSettled = true;
          } else if (txs[p.index].pendingAmount < billTot) {
            txs[p.index].status = 'Partially Debited';
          }
