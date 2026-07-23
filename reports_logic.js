@@ -803,34 +803,48 @@ function renderCbViewTable() {
            let amt = parseFloat(d.amount) || 0;
            let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
            
+           let status = (d.chargesStatus || '').toLowerCase();
+           let dPaid = (status === 'fully paid' || status === 'settled' || t.isSettled) ? cFee : (parseFloat(d.paidAmount) || 0);
+           let dPending = Math.max(0, cFee - dPaid);
+           let isPaid = (status === 'fully paid' || status === 'settled' || t.isSettled || dPending <= 0.01);
+
            if (currentCbViewTab === 'charges' && cFee > 0) {
-             rows.push({
-               originalIndex: t.originalIndex,
-               dateHtml: dateStr,
-               card: cardStr,
-               bank: bankStr !== '-' ? bankStr : (d.portal || 'Unknown'),
-               debitAmt: amt,
-               custCharges: cFee,
-               paid: 0,
-               pending: cFee,
-               status: 'Pending'
-             });
+             if (!isPaid && dPending > 0.01) {
+               rows.push({
+                 originalIndex: t.originalIndex,
+                 dateHtml: dateStr,
+                 card: cardStr,
+                 bank: bankStr !== '-' ? bankStr : (d.portal || 'Unknown'),
+                 debitAmt: amt,
+                 custCharges: cFee,
+                 paid: dPaid,
+                 pending: dPending,
+                 status: dPaid > 0 ? 'Partially Paid' : 'Pending'
+               });
+             }
            }
         });
       }
       
       if (currentCbViewTab === 'bills_receive' && bTotal > 0) {
-         rows.push({
-           originalIndex: t.originalIndex,
-           dateHtml: dateStr,
-           card: cardStr,
-           bank: bankStr,
-           debitAmt: bTotal,
-           custCharges: 0,
-           paid: 0,
-           pending: bTotal,
-           status: 'Pending'
-         });
+         let paidOnTx = 0;
+         if (t.raw.payments) {
+           t.raw.payments.forEach(p => paidOnTx += parseFloat(p.amount) || 0);
+         }
+         let pendingOnTx = t.isSettled ? 0 : Math.max(0, bTotal - paidOnTx);
+         if (pendingOnTx > 0.01) {
+           rows.push({
+             originalIndex: t.originalIndex,
+             dateHtml: dateStr,
+             card: cardStr,
+             bank: bankStr,
+             debitAmt: bTotal,
+             custCharges: 0,
+             paid: paidOnTx,
+             pending: pendingOnTx,
+             status: paidOnTx > 0 ? 'Partially Paid' : 'Pending'
+           });
+         }
       }
     });
   } else if (currentCbViewTab === 'bills_pay') {
@@ -1096,8 +1110,11 @@ function renderCbViewTable() {
       ledgerPay = Math.abs(ledgerNet); ledgerRecv = 0;
     }
     
-    const totRecv = chargesRecv + ledgerRecv + billsRecv;
-    const totPay = chargesPay + ledgerPay + billsPay;
+    let netChargesPending = Math.max(0, chargesRecv - chargesPay);
+    let netBillsPending = Math.max(0, billsRecv - billsPay);
+    
+    const totRecv = netChargesPending + ledgerRecv + netBillsPending;
+    const totPay = ledgerPay;
 
     const fmt = (n) => Math.round(n).toLocaleString('en-IN');
 
@@ -1152,13 +1169,13 @@ function renderCbViewTable() {
       document.getElementById('pdfRenderFooter').style.display = 'none';
     }
 
-    document.getElementById('pdfColCharges').textContent = 'Rs. ' + fmt(chargesRecv);
+    document.getElementById('pdfColCharges').textContent = 'Rs. ' + fmt(netChargesPending);
     document.getElementById('pdfColLedger').textContent = 'Rs. ' + fmt(ledgerRecv);
-    document.getElementById('pdfColBills').textContent = 'Rs. ' + fmt(billsRecv);
+    document.getElementById('pdfColBills').textContent = 'Rs. ' + fmt(netBillsPending);
     document.getElementById('pdfColTotal').textContent = 'Rs. ' + fmt(totRecv);
 
     document.getElementById('pdfPayLedger').textContent = 'Rs. ' + fmt(ledgerPay);
-    document.getElementById('pdfPayBills').textContent = 'Rs. ' + fmt(billsPay);
+    document.getElementById('pdfPayBills').textContent = 'Rs. 0';
     document.getElementById('pdfPayTotal').textContent = 'Rs. ' + fmt(totPay);
 
     const pdfTableBody = document.getElementById('pdfTableBody');
@@ -1171,8 +1188,16 @@ function renderCbViewTable() {
         t.raw.debits.forEach(d => {
           const amt = parseFloat(d.amount) || 0;
           const rate = parseFloat(d.ratePercent) || 0;
-          const cFee = amt * rate / 100;
+          const cFee = parseFloat(d.charges) || (amt * rate / 100);
           
+          let status = (d.chargesStatus || '').toLowerCase();
+          let dPaid = (status === 'fully paid' || status === 'settled' || t.isSettled) ? cFee : (parseFloat(d.paidAmount) || 0);
+          let dPending = Math.max(0, cFee - dPaid);
+          let isPaid = (status === 'fully paid' || status === 'settled' || t.isSettled || dPending <= 0.01);
+
+          // DO NOT include paid / settled charges in the PDF
+          if (isPaid || dPending <= 0.01) return;
+
           let cardStr = 'Unknown';
           if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
             let cardObj = cust.cards[t.raw.cardIndex];
@@ -1189,7 +1214,7 @@ function renderCbViewTable() {
             <td style="padding: 8px 6px; border: 1px solid #ddd6fe; text-align: right; white-space: nowrap;">${fmt(amt)}</td>
             <td style="padding: 8px 6px; border: 1px solid #ddd6fe; text-align: right; white-space: nowrap;">${rate.toFixed(1)}%</td>
             <td style="padding: 8px 6px; border: 1px solid #ddd6fe; text-align: right; white-space: nowrap;">${fmt(cFee)}</td>
-            <td style="padding: 8px 6px; border: 1px solid #ddd6fe; text-align: right; white-space: nowrap;">${fmt(cFee)}</td>
+            <td style="padding: 8px 6px; border: 1px solid #ddd6fe; text-align: right; white-space: nowrap;">${fmt(dPending)}</td>
           `;
           pdfTableBody.appendChild(tr);
         });
