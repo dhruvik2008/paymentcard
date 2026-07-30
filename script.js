@@ -74,10 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hasDuplicates) {
         customers = uniqueCustomers;
         localStorage.setItem('cardbills_customers', JSON.stringify(customers));
-        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
-        }
     }
 
     // Function to render customers
@@ -360,10 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirmDelete) {
                 customers.splice(editingCustomerIndex, 1);
                 localStorage.setItem('cardbills_customers', JSON.stringify(customers));
-                if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-                    const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-                    window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
-                }
                 renderCustomers();
 
                 viewCustomerDrawer.classList.remove('active');
@@ -604,10 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     if (txUpdated) {
                         localStorage.setItem('cardbills_transactions', JSON.stringify(transactions));
-                        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-                            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-                            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_transactions', transactions).catch(e => { });
-                        }
                         if (typeof window.renderTransactions === 'function') window.renderTransactions();
                         if (typeof window.renderRecentTransactions === 'function') window.renderRecentTransactions();
                         if (typeof window.renderAllTransactions === 'function') window.renderAllTransactions();
@@ -622,10 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save to localStorage
         localStorage.setItem('cardbills_customers', JSON.stringify(customers));
-        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
-        }
 
         // Re-render and close
         renderCustomers();
@@ -1042,10 +1026,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if (txNameUpdated) {
         localStorage.setItem('cardbills_transactions', JSON.stringify(transactions));
-        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_transactions', transactions).catch(e => { });
-        }
     }
 
     const calculatePendingAmount = (raw) => {
@@ -5346,12 +5326,6 @@ window.savePdfSettings = () => {
     };
 
     localStorage.setItem('cardbills_pdf_settings', JSON.stringify(settings));
-
-    // Also push to firebase if sync is active
-    if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-        const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-        window.firebaseDB.write('users/' + encodedEmail + '/cardbills_pdf_settings', settings).catch(e => { });
-    }
 
     showToast('PDF Settings saved successfully!', 'success');
 };
