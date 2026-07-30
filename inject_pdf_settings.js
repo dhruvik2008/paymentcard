@@ -214,11 +214,7 @@ window.savePdfSettings = () => {
   
   localStorage.setItem('cardbills_pdf_settings', JSON.stringify(settings));
   
-  // Also push to firebase if sync is active
-  if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
-    const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
-    window.firebaseDB.write('users/' + encodedEmail + '/cardbills_pdf_settings', settings).catch(e=>{});
-  }
+  // Sync is handled automatically by sync.js intercepting localStorage.setItem
 
   showToast('PDF Settings saved successfully!', 'success');
 };
