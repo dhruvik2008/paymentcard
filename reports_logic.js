@@ -106,6 +106,7 @@
       let chargesPay = 0;
       let billsRecv = 0;
       let billsPay = 0;
+      let pendingToCard = 0;
       
       const origCustIndex = allCustomers.findIndex(orig => orig.name === c.name);
 
@@ -113,17 +114,23 @@
         if (!t.raw) return;
         if ((t.customerName || '').toLowerCase() !== c.name.toLowerCase()) return;
         
-        billsRecv += parseFloat(t.raw.billTotal) || 0;
+        let txBill = parseFloat(t.raw.billTotal) || 0;
+        billsRecv += txBill;
         
+        let txPaid = 0;
         if (t.raw.payments) {
           t.raw.payments.forEach(p => {
-             billsPay += parseFloat(p.amount) || 0;
+             let pAmt = parseFloat(p.amount) || 0;
+             billsPay += pAmt;
+             txPaid += pAmt;
           });
         }
         
+        let txDebit = 0;
         if (t.raw.debits) {
           t.raw.debits.forEach(d => {
             let amt = parseFloat(d.amount) || 0;
+            txDebit += amt;
             let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
             chargesRecv += cFee; 
             
@@ -136,6 +143,8 @@
             }
           });
         }
+        
+        pendingToCard += Math.max(0, txBill - txPaid) + Math.max(0, txPaid - txDebit);
       });
       
       let ledgerRecv = 0;
@@ -204,7 +213,7 @@
       totalBillsPending += currentBills;
 
       cardsData.push({
-        c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay
+        c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay, pendingToCard
       });
     });
 
@@ -212,7 +221,7 @@
     cardsData.sort((a, b) => b.netCollect - a.netCollect);
 
     cardsData.forEach(data => {
-      const { c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay } = data;
+      const { c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay, pendingToCard } = data;
       const initials = (c.name || 'U').substring(0, 2).toUpperCase();
       const card = document.createElement('div');
       card.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; overflow: hidden; display: flex; flex-direction: column;';
@@ -232,6 +241,7 @@
         <div style="padding: 16px; background: #f9fafb; text-align: center; border-bottom: 1px solid #f3f4f6;">
           <div style="font-size: 0.75rem; color: #166534; font-weight: 600; margin-bottom: 4px;">Collect from Customer</div>
           <div style="font-size: 1.5rem; font-weight: 700; color: #16a34a;">₹${netCollect.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+          ${pendingToCard > 0 ? `<div style="font-size: 0.8rem; color: #ea580c; font-weight: 600; margin-top: 8px;">Pending to Card: ₹${pendingToCard.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>` : ''}
         </div>
         <div style="padding: 16px; display: flex; border-bottom: 1px solid #f3f4f6;">
           <div style="flex: 1; text-align: center; border-right: 1px solid #f3f4f6;">
