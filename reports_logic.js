@@ -271,9 +271,9 @@
           </div>
         </div>
         <div style="padding: 16px; display: flex; gap: 8px;">
-          <button class="btn btn-outline" onclick="openCustomerBalanceView('${c.name}', '${c.phone}')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #2563eb; background: #eff6ff; border: none; font-weight: 600; cursor: pointer;">View</button>
-          <button class="btn btn-outline" onclick="processCustomerSettlement('${c.name}', 'receive')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #16a34a; background: #f0fdf4; border: none; font-weight: 600; cursor: pointer;">Settle</button>
-          <button class="btn btn-outline" onclick="processCustomerSettlement('${c.name}', 'pay')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #dc2626; background: #fef2f2; border: none; font-weight: 600; cursor: pointer;">Pay</button>
+          <button class="btn btn-outline" onclick="openCustomerBalanceView('${c.name.replace(/'/g, "\\'")}', '${(c.phone || '').replace(/'/g, "\\'")}')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #2563eb; background: #eff6ff; border: none; font-weight: 600; cursor: pointer;">View</button>
+          <button class="btn btn-outline" onclick="processCustomerSettlement('${c.name.replace(/'/g, "\\'")}', 'receive')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #16a34a; background: #f0fdf4; border: none; font-weight: 600; cursor: pointer;">Settle</button>
+          <button class="btn btn-outline" onclick="processCustomerSettlement('${c.name.replace(/'/g, "\\'")}', 'pay')" style="flex: 1; border-radius: 8px; font-size: 0.85rem; padding: 6px; color: #dc2626; background: #fef2f2; border: none; font-weight: 600; cursor: pointer;">Pay</button>
         </div>
       `;
       cbGrid.appendChild(card);
@@ -802,7 +802,7 @@ function renderCbViewTable() {
       
       if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
         let cardObj = cust.cards[t.raw.cardIndex];
-        cardStr = `${cardObj.first} ${cardObj.mid.replace(/\s/g, ' ')} ${cardObj.last}`;
+        cardStr = `${cardObj.first} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last}`;
         bankStr = cardObj.bank || '-';
       } else if (t.raw.cardIndex !== '') {
         cardStr = 'Card ' + t.raw.cardIndex;
@@ -814,9 +814,9 @@ function renderCbViewTable() {
            let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
            
            let status = (d.chargesStatus || '').toLowerCase();
-           let dPaid = (status === 'fully paid' || status === 'settled' || t.isSettled) ? cFee : (parseFloat(d.paidAmount) || 0);
+           let dPaid = (status === 'fully paid' || status === 'settled') ? cFee : (parseFloat(d.paidAmount) || 0);
            let dPending = Math.max(0, cFee - dPaid);
-           let isPaid = (status === 'fully paid' || status === 'settled' || t.isSettled || dPending <= 0.01);
+           let isPaid = (status === 'fully paid' || status === 'settled' || dPending <= 0.01);
 
            if (currentCbViewTab === 'charges' && cFee > 0) {
              if (!isPaid && dPending > 0.01) {
@@ -866,7 +866,7 @@ function renderCbViewTable() {
         let bankStr = '-';
         if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
           let cardObj = cust.cards[t.raw.cardIndex];
-          cardStr = `${cardObj.first} ${cardObj.mid.replace(/\s/g, ' ')} ${cardObj.last}`;
+          cardStr = `${cardObj.first} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last}`;
           bankStr = cardObj.bank || '-';
         } else if (t.raw.cardIndex !== '') {
           cardStr = 'Card ' + t.raw.cardIndex;
@@ -1201,9 +1201,9 @@ function renderCbViewTable() {
           const cFee = parseFloat(d.charges) || (amt * rate / 100);
           
           let status = (d.chargesStatus || '').toLowerCase();
-          let dPaid = (status === 'fully paid' || status === 'settled' || t.isSettled) ? cFee : (parseFloat(d.paidAmount) || 0);
+          let dPaid = (status === 'fully paid' || status === 'settled') ? cFee : (parseFloat(d.paidAmount) || 0);
           let dPending = Math.max(0, cFee - dPaid);
-          let isPaid = (status === 'fully paid' || status === 'settled' || t.isSettled || dPending <= 0.01);
+          let isPaid = (status === 'fully paid' || status === 'settled' || dPending <= 0.01);
 
           // DO NOT include paid / settled charges in the PDF
           if (isPaid || dPending <= 0.01) return;
