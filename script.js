@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasDuplicates = false;
     const uniqueCustomers = [];
     const seenNames = new Map(); // map lowerName to index in uniqueCustomers
-    
+
     customers.forEach(c => {
         const lowerName = (c.name || '').trim().toLowerCase();
         if (!seenNames.has(lowerName)) {
@@ -360,6 +360,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirmDelete) {
                 customers.splice(editingCustomerIndex, 1);
                 localStorage.setItem('cardbills_customers', JSON.stringify(customers));
+                if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
+                    const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+                    window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
+                }
                 renderCustomers();
 
                 viewCustomerDrawer.classList.remove('active');
@@ -562,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add to array
         const newName = nameInput.value.trim();
-        
+
         if (editingCustomerIndex === -1) {
             // Check for duplicate name when adding a new customer
             const nameExists = customers.some(c => c.name.toLowerCase() === newName.toLowerCase());
@@ -586,7 +590,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' at ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
         if (editingCustomerIndex !== -1) {
+            const oldName = customers[editingCustomerIndex].name;
             customers[editingCustomerIndex] = { ...customers[editingCustomerIndex], ...newCustomer, updatedAt: now };
+
+            if (oldName && oldName !== newCustomer.name) {
+                let txUpdated = false;
+                if (typeof transactions !== 'undefined') {
+                    transactions.forEach(tx => {
+                        if (tx.customerName === oldName) {
+                            tx.customerName = newCustomer.name;
+                            txUpdated = true;
+                        }
+                    });
+                    if (txUpdated) {
+                        localStorage.setItem('cardbills_transactions', JSON.stringify(transactions));
+                        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
+                            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+                            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_transactions', transactions).catch(e => { });
+                        }
+                        if (typeof window.renderTransactions === 'function') window.renderTransactions();
+                        if (typeof window.renderRecentTransactions === 'function') window.renderRecentTransactions();
+                        if (typeof window.renderAllTransactions === 'function') window.renderAllTransactions();
+                    }
+                }
+            }
         } else {
             newCustomer.createdAt = now;
             newCustomer.updatedAt = now;
@@ -595,6 +622,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save to localStorage
         localStorage.setItem('cardbills_customers', JSON.stringify(customers));
+        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
+            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_customers', customers).catch(e => { });
+        }
 
         // Re-render and close
         renderCustomers();
@@ -989,13 +1020,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionListBody = document.getElementById('transactionListBody');
     let transactions = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
 
+    // Migration: Update transaction customer names if they were renamed or merged
+    let txNameUpdated = false;
+    transactions.forEach(tx => {
+        if (tx.customerName && tx.customerName !== 'Settlement Account') {
+            const exactMatch = customers.find(c => c.name === tx.customerName);
+            if (!exactMatch) {
+                let match = null;
+                if (tx.customerPhone && tx.customerPhone !== '-') {
+                    match = customers.find(c => c.phone === tx.customerPhone);
+                }
+                if (!match) {
+                    match = customers.find(c => (c.name || '').toLowerCase() === tx.customerName.toLowerCase());
+                }
+                if (match) {
+                    tx.customerName = match.name;
+                    txNameUpdated = true;
+                }
+            }
+        }
+    });
+    if (txNameUpdated) {
+        localStorage.setItem('cardbills_transactions', JSON.stringify(transactions));
+        if (window.firebaseDB && localStorage.getItem('cardbills_logged_in_user_email')) {
+            const encodedEmail = localStorage.getItem('cardbills_logged_in_user_email').toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
+            window.firebaseDB.write('users/' + encodedEmail + '/cardbills_transactions', transactions).catch(e => { });
+        }
+    }
+
+    const calculatePendingAmount = (raw) => {
+        if (!raw) return 0;
+        const bill = parseFloat(raw.billTotal) || 0;
+        const paid = raw.payments ? raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
+        const debitAmt = raw.debits ? raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
+
+        return Math.max(0, bill - paid) + Math.max(0, paid - debitAmt);
+    };
+
     // Migration: Recalculate pending amounts for existing transactions
     transactions.forEach(tx => {
         if (tx.raw) {
             const bill = parseFloat(tx.raw.billTotal) || 0;
             const paid = tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
 
-            const pendingAmount = Math.max(0, bill - paid);
+            const pendingAmount = calculatePendingAmount(tx.raw);
 
             let stat = 'Pending';
             let statCol = '#f97316';
@@ -1235,11 +1303,19 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             populateWizardCustomers();
             const sortedCustArray = [...customers].sort((a, b) => a.name.localeCompare(b.name));
-            const currentSortedIdx = sortedCustArray.findIndex(c => c.name === tx.customerName);
-            wizardCustomer.value = currentSortedIdx >= 0 ? currentSortedIdx : tx.raw.custIndex;
+            let currentSortedIdx = sortedCustArray.findIndex(c => c.name === tx.customerName);
+            if (currentSortedIdx === -1 && tx.customerPhone && tx.customerPhone !== '-') {
+                currentSortedIdx = sortedCustArray.findIndex(c => c.phone === tx.customerPhone);
+            }
+            if (currentSortedIdx === -1 && tx.customerName) {
+                currentSortedIdx = sortedCustArray.findIndex(c => (c.name || '').toLowerCase() === tx.customerName.toLowerCase());
+            }
+
+            wizardCustomer.value = currentSortedIdx >= 0 ? currentSortedIdx : '';
             wizardCard.innerHTML = '<option value="" disabled selected hidden></option>';
-            const customer = currentSortedIdx >= 0 ? sortedCustArray[currentSortedIdx] : sortedCustArray[tx.raw.custIndex];
-            if (customer.cards && customer.cards.length > 0) {
+            const customer = currentSortedIdx >= 0 ? sortedCustArray[currentSortedIdx] : null;
+
+            if (customer && customer.cards && customer.cards.length > 0) {
                 wizardCard.disabled = false;
                 customer.cards.forEach((card, index) => {
                     const option = document.createElement('option');
@@ -1247,7 +1323,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     option.textContent = `${card.bank} - ${card.type} (**** ${card.last})`;
                     wizardCard.appendChild(option);
                 });
-                wizardCard.value = tx.raw.cardIndex;
+
+                let expectedCardIdx = tx.raw.cardIndex;
+                if (expectedCardIdx !== undefined && expectedCardIdx !== null && customer.cards[expectedCardIdx]) {
+                    if (customer.cards[expectedCardIdx].bank !== tx.bank || String(customer.cards[expectedCardIdx].last) !== String(tx.cardSuffix)) {
+                        expectedCardIdx = customer.cards.findIndex(card => card.bank === tx.bank && String(card.last) === String(tx.cardSuffix));
+                    }
+                } else {
+                    expectedCardIdx = customer.cards.findIndex(card => card.bank === tx.bank && String(card.last) === String(tx.cardSuffix));
+                }
+                wizardCard.value = expectedCardIdx >= 0 ? expectedCardIdx : '';
             } else {
                 wizardCard.disabled = true;
             }
@@ -2282,8 +2367,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const billAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const paidAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const debitAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    let pendingAmt = Math.max(0, billAmt - paidAmt) + Math.max(0, paidAmt - debitAmt);
+                    let pendingAmt = calculatePendingAmount(tx.raw);
                     if (tx.isSettled) pendingAmt = 0;
+
+                    const totalCharges = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.charges) || 0), 0) : 0;
+                    const paidCharges = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => {
+                        let status = (d.chargesStatus || '').toLowerCase();
+                        let dPaid = parseFloat(d.paidAmount) || 0;
+                        if (status === 'fully paid' || status === 'settled') return s + (parseFloat(d.charges) || 0);
+                        if (dPaid > 0) return s + dPaid;
+                        return s;
+                    }, 0) : 0;
+                    const pendingCharges = Math.max(0, totalCharges - paidCharges);
+
                     return `
               <div style="display:flex;flex-direction:column;gap:2px;font-size:0.8rem;">
                 <div style="display:flex;justify-content:space-between;gap:12px;">
@@ -2291,13 +2387,23 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span style="font-weight:600;color:#111827;">₹${billAmt.toLocaleString('en-IN')}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:12px;">
-                  <span style="color:#6b7280;">Paid:</span>
+                  <span style="color:#6b7280;">Received:</span>
                   <span style="font-weight:600;color:#10b981;">₹${paidAmt.toLocaleString('en-IN')}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:12px;">
+                  <span style="color:#6b7280;">Paid to Card:</span>
+                  <span style="font-weight:600;color:#3b82f6;">₹${debitAmt.toLocaleString('en-IN')}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:12px;">
                   <span style="color:#6b7280;">Pending:</span>
                   <span style="font-weight:600;color:${pendingAmt > 0 ? '#f97316' : '#10b981'};">₹${pendingAmt.toLocaleString('en-IN')}</span>
                 </div>
+                ${pendingCharges > 0 ? `
+                <div style="display:flex;justify-content:space-between;gap:12px;margin-top:2px;padding-top:2px;border-top:1px dashed #e5e7eb;">
+                  <span style="color:#d97706;">Pending Charges:</span>
+                  <span style="font-weight:600;color:#d97706;">₹${pendingCharges.toLocaleString('en-IN')}</span>
+                </div>
+                ` : ''}
               </div>
             `;
                 })()}
@@ -2308,7 +2414,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    let currentPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    let currentPending = calculatePendingAmount(tx.raw);
                     if (tx.isSettled) currentPending = 0;
                     return `<span style="font-weight: 600; color: ${currentPending > 0 ? '#f97316' : '#10b981'};">
             ₹${currentPending.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -2320,7 +2426,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
                     const dAmt = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) : 0;
-                    let customerPending = Math.max(0, bAmt - pAmt) + Math.max(0, pAmt - dAmt);
+                    let customerPending = calculatePendingAmount(tx.raw);
                     if (tx.isSettled) customerPending = 0;
 
                     let currentStatus = customerPending <= 0 ? 'Fully Debited' : 'Pending';
@@ -2436,6 +2542,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const getWizardBillTotal = () => parseFloat(document.getElementById('wizardTotalAmount').value) || 0;
     const getWizardPaidTotal = () => wizardPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
     const getWizardDebitTotal = () => wizardDebits.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+
+    const getWizardPendingTotal = () => {
+        const bill = getWizardBillTotal();
+        const paid = getWizardPaidTotal();
+        const debit = getWizardDebitTotal();
+
+        return Math.max(0, bill - paid) + Math.max(0, paid - debit);
+    };
 
     document.getElementById('wizardTotalAmount').addEventListener('input', () => updateWizardUI());
 
@@ -2735,7 +2849,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bill = getWizardBillTotal();
         const paid = getWizardPaidTotal();
         const debit = getWizardDebitTotal();
-        const pending = Math.max(0, bill - paid);
+        const pending = getWizardPendingTotal();
 
         document.getElementById('paymentSummaryTotal').textContent = `₹${bill.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         document.getElementById('paymentSummaryPaid').textContent = `₹${paid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -2756,7 +2870,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bill = getWizardBillTotal();
             const paid = getWizardPaidTotal();
             const debit = getWizardDebitTotal();
-            const pending = Math.max(0, bill - paid) + Math.max(0, paid - debit);
+            const pending = getWizardPendingTotal();
 
             document.getElementById('summaryCustomer').textContent = customer.name;
             document.getElementById('summaryCard').textContent = `${card.bank} (**** ${card.last})`;
@@ -2858,7 +2972,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bill = getWizardBillTotal();
             const paid = getWizardPaidTotal();
             const debit = getWizardDebitTotal();
-            const pendingAmount = Math.max(0, bill - paid) + Math.max(0, paid - debit);
+            const pendingAmount = getWizardPendingTotal();
 
             const now = new Date();
             const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
@@ -3572,7 +3686,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.onmouseover = () => { card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout = () => { card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)'; card.style.transform = 'translateY(0)'; };
             card.onclick = () => openUdharDetails(name);
-            
+
             card.innerHTML = `
                 <div style="padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #f3f4f6;">
                     <div style="width: 46px; height: 46px; border-radius: 50%; background: ${colorSet.bg}; color: ${colorSet.text}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; letter-spacing: 0.5px;">
@@ -3636,10 +3750,10 @@ document.addEventListener('DOMContentLoaded', () => {
             row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02); transition: all 0.2s; cursor: default;';
             row.onmouseover = () => { row.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)'; row.style.transform = 'translateY(-1px)'; row.style.borderColor = '#d1d5db'; };
             row.onmouseout = () => { row.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02)'; row.style.transform = 'none'; row.style.borderColor = '#e5e7eb'; };
-            
+
             const amt = parseFloat(entry.amount) || 0;
             const dateStr = new Date(entry.date).toLocaleDateString('en-GB');
-            
+
             row.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <div style="width: 42px; height: 42px; background: #fff7ed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ea580c;">
@@ -3676,15 +3790,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.editUdhar = (id) => {
         const entry = cardbills_udhar.find(u => u.id === id);
         if (!entry) return;
-        
+
         editUdharId = id;
         if (udharName) udharName.value = entry.name || '';
         if (udharAmount) udharAmount.value = entry.amount || '';
         if (udharDate) udharDate.value = entry.date || '';
-        
+
         const modalTitle = addUdharModal.querySelector('h3');
         if (modalTitle) modalTitle.textContent = 'Edit Receivable Entry';
-        
+
         closeUdharDetailsModalFunc();
         if (addUdharModal) addUdharModal.style.display = 'flex';
     };
@@ -3697,7 +3811,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardbills_udhar.splice(idx, 1);
                 localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
                 renderUdhar();
-                
+
                 // If details modal is open, refresh it or close if empty
                 const detailsModal = document.getElementById('udharDetailsModal');
                 if (detailsModal && detailsModal.style.display === 'flex') {
@@ -3708,7 +3822,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         closeUdharDetailsModalFunc();
                     }
                 }
-                
+
                 showToast('Entry deleted.', 'info');
             }
         }
@@ -3738,7 +3852,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (udharForm) {
         udharForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             if (editUdharId) {
                 const idx = cardbills_udhar.findIndex(u => u.id === editUdharId);
                 if (idx > -1) {
@@ -3759,16 +3873,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardbills_udhar.push(newU);
                 if (typeof showToast === 'function') showToast('Receivable entry added successfully!', 'success');
             }
-            
+
             localStorage.setItem('cardbills_udhar', JSON.stringify(cardbills_udhar));
             renderUdhar();
-            
+
             // If details modal is open (meaning we edited from there), refresh it
             const detailsModal = document.getElementById('udharDetailsModal');
             if (detailsModal && detailsModal.style.display === 'flex') {
-                 openUdharDetails(udharName.value.trim());
+                openUdharDetails(udharName.value.trim());
             }
-            
+
             closeUdharModalFunc();
         });
     }
