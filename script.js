@@ -4764,7 +4764,15 @@ const renderDashboard = () => {
     currentTxs.forEach(tx => {
         if (!tx.raw || tx.isSettlement) return;
         const cust = currentCustomers.find(c => c.name === tx.customerName);
-        const card = cust && cust.cards && tx.raw ? cust.cards[tx.raw.cardIndex] : null;
+        let card = null;
+        if (cust && cust.cards && cust.cards.length > 0) {
+            if (tx.bank && tx.cardSuffix) {
+                card = cust.cards.find(c => c.bank === tx.bank && String(c.last) === String(tx.cardSuffix));
+            }
+            if (!card && tx.raw && tx.raw.cardIndex !== undefined && tx.raw.cardIndex !== '' && cust.cards[tx.raw.cardIndex]) {
+                card = cust.cards[tx.raw.cardIndex];
+            }
+        }
         const pendingStr = tx.pending || '0';
         const pendingVal = parseFloat(pendingStr.replace(/[^0-9.-]/g, '')) || 0;
 
