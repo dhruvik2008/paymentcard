@@ -797,14 +797,27 @@ function renderCbViewTable() {
       let bTotal = parseFloat(t.raw.billTotal) || 0;
       let dateStr = new Date(t.date).toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'}) + '<br><span style="font-size:0.7rem;color:#94a3b8;">' + (t.time || '') + '</span>';
       
+      let cardObj = null;
+      if (cust && cust.cards && cust.cards.length > 0) {
+        if (t.bank && t.cardSuffix) {
+          cardObj = cust.cards.find(c => c.bank === t.bank && String(c.last) === String(t.cardSuffix));
+        }
+        if (!cardObj && t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '' && cust.cards[t.raw.cardIndex]) {
+          cardObj = cust.cards[t.raw.cardIndex];
+        }
+      }
+
       let cardStr = 'Unknown';
-      let bankStr = '-';
+      let bankStr = t.bank || '-';
       
-      if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
-        let cardObj = cust.cards[t.raw.cardIndex];
-        cardStr = `${cardObj.first} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last}`;
-        bankStr = cardObj.bank || '-';
-      } else if (t.raw.cardIndex !== '') {
+      if (cardObj) {
+        let fullName = `${cardObj.first || ''} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last || ''}`.trim();
+        cardStr = fullName || `${cardObj.bank || t.bank || 'Card'} **${cardObj.last || t.cardSuffix || ''}`;
+        bankStr = cardObj.bank || t.bank || '-';
+      } else if (t.bank || t.cardSuffix) {
+        cardStr = `${t.bank || 'Card'} **${t.cardSuffix || ''}`;
+        bankStr = t.bank || '-';
+      } else if (t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '') {
         cardStr = 'Card ' + t.raw.cardIndex;
       }
       
@@ -862,13 +875,26 @@ function renderCbViewTable() {
       if (t.raw.payments && t.raw.payments.length > 0) {
         let dateStr = new Date(t.date).toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'}) + '<br><span style="font-size:0.7rem;color:#94a3b8;">' + (t.time || '') + '</span>';
         
+        let cardObj = null;
+        if (cust && cust.cards && cust.cards.length > 0) {
+          if (t.bank && t.cardSuffix) {
+            cardObj = cust.cards.find(c => c.bank === t.bank && String(c.last) === String(t.cardSuffix));
+          }
+          if (!cardObj && t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '' && cust.cards[t.raw.cardIndex]) {
+            cardObj = cust.cards[t.raw.cardIndex];
+          }
+        }
+
         let cardStr = 'Unknown';
-        let bankStr = '-';
-        if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
-          let cardObj = cust.cards[t.raw.cardIndex];
-          cardStr = `${cardObj.first} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last}`;
-          bankStr = cardObj.bank || '-';
-        } else if (t.raw.cardIndex !== '') {
+        let bankStr = t.bank || '-';
+        if (cardObj) {
+          let fullName = `${cardObj.first || ''} ${(cardObj.mid || '').replace(/\s/g, ' ')} ${cardObj.last || ''}`.trim();
+          cardStr = fullName || `${cardObj.bank || t.bank || 'Card'} **${cardObj.last || t.cardSuffix || ''}`;
+          bankStr = cardObj.bank || t.bank || '-';
+        } else if (t.bank || t.cardSuffix) {
+          cardStr = `${t.bank || 'Card'} **${t.cardSuffix || ''}`;
+          bankStr = t.bank || '-';
+        } else if (t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '') {
           cardStr = 'Card ' + t.raw.cardIndex;
         }
         
@@ -1208,10 +1234,23 @@ function renderCbViewTable() {
           // DO NOT include paid / settled charges in the PDF
           if (isPaid || dPending <= 0.01) return;
 
+          let cardObj = null;
+          if (cust && cust.cards && cust.cards.length > 0) {
+            if (t.bank && t.cardSuffix) {
+              cardObj = cust.cards.find(c => c.bank === t.bank && String(c.last) === String(t.cardSuffix));
+            }
+            if (!cardObj && t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '' && cust.cards[t.raw.cardIndex]) {
+              cardObj = cust.cards[t.raw.cardIndex];
+            }
+          }
+
           let cardStr = 'Unknown';
-          if (t.raw.cardIndex !== '' && cust && cust.cards && cust.cards[t.raw.cardIndex]) {
-            let cardObj = cust.cards[t.raw.cardIndex];
-            cardStr = `${cardObj.bank || 'Card'} **${cardObj.last}`;
+          if (cardObj) {
+            cardStr = `${cardObj.bank || t.bank || 'Card'} **${cardObj.last || t.cardSuffix || ''}`;
+          } else if (t.bank || t.cardSuffix) {
+            cardStr = `${t.bank || 'Card'} **${t.cardSuffix || ''}`;
+          } else if (t.raw && t.raw.cardIndex !== undefined && t.raw.cardIndex !== '') {
+            cardStr = 'Card ' + t.raw.cardIndex;
           }
           
           const dateStr = new Date(t.date).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: '2-digit'});
