@@ -2994,6 +2994,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             localStorage.setItem('cardbills_transactions', JSON.stringify(transactions));
             renderTransactions();
+            if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
 
             alert('Transaction Submitted Successfully!');
             showSection(transactionsSection);
@@ -3873,6 +3874,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (key === 'cardbills_customers') {
             customers = JSON.parse(localStorage.getItem('cardbills_customers')) || [];
             if (typeof renderCustomers === 'function') renderCustomers();
+            if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
+            if (typeof window.renderCbViewTable === 'function') window.renderCbViewTable();
         } else if (key === 'cardbills_transactions') {
             transactions = JSON.parse(localStorage.getItem('cardbills_transactions')) || [];
             if (typeof window.renderTransactions === 'function') window.renderTransactions();
@@ -3880,9 +3883,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof window.renderAllTransactions === 'function') window.renderAllTransactions();
             if (typeof window.updateDashboardStats === 'function') window.updateDashboardStats();
             if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
+            if (typeof window.renderCbViewTable === 'function') window.renderCbViewTable();
         } else if (key === 'cardbills_ledger_entries') {
             if (typeof window.renderLedgerEntries === 'function') window.renderLedgerEntries();
             if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
+            if (typeof window.renderCbViewTable === 'function') window.renderCbViewTable();
         } else if (key === 'cardbills_expenses') {
             cardbills_expenses = JSON.parse(localStorage.getItem('cardbills_expenses')) || [];
             if (typeof window.renderExpenses === 'function') window.renderExpenses();
@@ -3892,6 +3897,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (key === 'cardbills_udhar') {
             cardbills_udhar = JSON.parse(localStorage.getItem('cardbills_udhar')) || [];
             if (typeof window.renderUdhar === 'function') window.renderUdhar();
+            if (typeof window.renderCustomerBalancesReport === 'function') window.renderCustomerBalancesReport();
+            if (typeof window.renderCbViewTable === 'function') window.renderCbViewTable();
         }
     });
 
