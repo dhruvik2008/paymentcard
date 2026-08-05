@@ -11,6 +11,9 @@ localStorage.setItem = function (key, value) {
     originalSetItem(key, value);
 
     if (SYNC_KEYS.includes(key)) {
+        // Dispatch local event IMMEDIATELY so all UI views & reports update instantly without waiting for network/firebase
+        window.dispatchEvent(new CustomEvent('data-synced', { detail: key }));
+
         // ONLY push to Firebase if we have completed the initial fetch for this key!
         // This prevents local empty state initialization (like []) from overwriting remote data on login.
         if (!firebaseSyncedKeys.has(key)) {
