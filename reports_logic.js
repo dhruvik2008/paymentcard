@@ -957,6 +957,7 @@ function renderCbViewTable() {
     tbody.appendChild(tr);
   });
 }
+window.renderCbViewTable = renderCbViewTable;
 
 
   // --- Net Profit Details Modal Logic ---
@@ -1131,26 +1132,55 @@ function renderCbViewTable() {
       if ((l.subUser && l.subUser.trim().toLowerCase() === currentCbViewCustomer.trim().toLowerCase()) || (l.description && l.description.toLowerCase().includes(currentCbViewCustomer.trim().toLowerCase()))) {
         let lAmt = parseFloat(l.amount) || 0;
         const typeLower = l.type?.toLowerCase();
-        if (typeLower === 'expense' || typeLower === 'bank_transfer') {
-          ledgerPay += lAmt;
-        } else if (typeLower === 'income' || typeLower === 'cash') {
+        if (typeLower === 'expense' || typeLower === 'cash given' || typeLower === 'bank transfer sent') {
           ledgerRecv += lAmt;
+        } else if (typeLower === 'income' || typeLower === 'cash received' || typeLower === 'bank transfer received') {
+          ledgerPay += lAmt;
         }
       }
     });
     
+    let currentCharges = chargesRecv - chargesPay;
+    let currentBills = billsRecv - billsPay;
     let ledgerNet = ledgerRecv - ledgerPay;
+
+    // Auto-offset negative bills against positive charges
+    if (currentBills < 0 && currentCharges > 0) {
+       let deduct = Math.min(currentCharges, Math.abs(currentBills));
+       currentCharges -= deduct;
+       currentBills += deduct;
+       chargesPay += deduct;
+       billsPay -= deduct;
+    }
+
+    // Auto-offset overpayments (negative ledger) against pending charges and bills
+    if (ledgerNet < 0) {
+      let available = Math.abs(ledgerNet);
+      if (currentCharges > 0) {
+         let deduct = Math.min(currentCharges, available);
+         currentCharges -= deduct;
+         available -= deduct;
+         chargesPay += deduct;
+         ledgerPay -= deduct;
+      }
+      if (currentBills > 0 && available > 0) {
+         let deduct = Math.min(currentBills, available);
+         currentBills -= deduct;
+         available -= deduct;
+         billsPay += deduct;
+         ledgerPay -= deduct;
+      }
+      ledgerNet = -available;
+    }
+
     if (ledgerNet > 0) {
       ledgerRecv = ledgerNet; ledgerPay = 0;
     } else {
       ledgerPay = Math.abs(ledgerNet); ledgerRecv = 0;
     }
     
-    let netChargesPending = Math.max(0, chargesRecv - chargesPay);
-    let netBillsPending = Math.max(0, billsRecv - billsPay);
-    
-    const totRecv = netChargesPending + ledgerRecv + netBillsPending;
-    const totPay = ledgerPay;
+    const totRecv = chargesRecv + ledgerRecv + billsRecv;
+    const totPay = chargesPay + ledgerPay + billsPay;
 
     const fmt = (n) => Math.round(n).toLocaleString('en-IN');
 
@@ -1205,13 +1235,16 @@ function renderCbViewTable() {
       document.getElementById('pdfRenderFooter').style.display = 'none';
     }
 
-    document.getElementById('pdfColCharges').textContent = 'Rs. ' + fmt(netChargesPending);
+    document.getElementById('pdfColCharges').textContent = 'Rs. ' + fmt(chargesRecv);
     document.getElementById('pdfColLedger').textContent = 'Rs. ' + fmt(ledgerRecv);
-    document.getElementById('pdfColBills').textContent = 'Rs. ' + fmt(netBillsPending);
+    document.getElementById('pdfColBills').textContent = 'Rs. ' + fmt(billsRecv);
     document.getElementById('pdfColTotal').textContent = 'Rs. ' + fmt(totRecv);
 
+    if (document.getElementById('pdfPayCharges')) {
+      document.getElementById('pdfPayCharges').textContent = 'Rs. ' + fmt(chargesPay);
+    }
     document.getElementById('pdfPayLedger').textContent = 'Rs. ' + fmt(ledgerPay);
-    document.getElementById('pdfPayBills').textContent = 'Rs. 0';
+    document.getElementById('pdfPayBills').textContent = 'Rs. ' + fmt(billsPay);
     document.getElementById('pdfPayTotal').textContent = 'Rs. ' + fmt(totPay);
 
     const pdfTableBody = document.getElementById('pdfTableBody');
