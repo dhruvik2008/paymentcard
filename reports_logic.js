@@ -280,10 +280,10 @@
     });
 
     const totOweUs = totalChargesPending + totalLedgerPending + totalBillsPending;
-    document.getElementById('cbChargesPending').textContent = `₹${totalChargesPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('cbLedgerPending').textContent = `₹${totalLedgerPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('cbBillsPending').textContent = `₹${totalBillsPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('cbCustomersOweUs').textContent = `₹${totOweUs.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    if (document.getElementById('cbChargesPending')) document.getElementById('cbChargesPending').textContent = `₹${totalChargesPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    if (document.getElementById('cbLedgerPending')) document.getElementById('cbLedgerPending').textContent = `₹${totalLedgerPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    if (document.getElementById('cbBillsPending')) document.getElementById('cbBillsPending').textContent = `₹${totalBillsPending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    if (document.getElementById('cbCustomersOweUs')) document.getElementById('cbCustomersOweUs').textContent = `₹${totOweUs.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
   }
   window.renderCustomerBalancesReport = renderCustomerBalancesReport;
 
