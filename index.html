@@ -318,11 +318,36 @@
 
 
   <script>
-    // Auth & PIN Initialization Logic
+    // Auth & PIN Initialization Logic (Salted Hashing for Anti-Leak Protection)
     (function () {
+      window.hashPin = function (pin) {
+        if (!pin) return '';
+        const salt = 'Maniya_Enterprise_PIN_Salt_2026';
+        let hash = 0;
+        const str = salt + pin + salt;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return 'ME_PIN_' + Math.abs(hash).toString(36) + '_' + (pin.charCodeAt(0) ^ 87) + (pin.charCodeAt(pin.length - 1) ^ 42);
+      };
+
+      let savedPin = localStorage.getItem('cardbills_app_pin');
+
+      // Auto-set default PIN 2012 in hashed form if no PIN exists yet
+      if (!savedPin) {
+        savedPin = window.hashPin('2012');
+        localStorage.setItem('cardbills_app_pin', savedPin);
+        localStorage.setItem('cardbills_pin_enabled', 'true');
+      } else if (/^\d{4}$/.test(savedPin)) {
+        // Upgrade legacy cleartext PIN to salted hash
+        savedPin = window.hashPin(savedPin);
+        localStorage.setItem('cardbills_app_pin', savedPin);
+      }
+
       const isAuthUser = localStorage.getItem('cardbills_auth_user') === 'true';
-      const pinEnabled = localStorage.getItem('cardbills_pin_enabled') === 'true';
-      const savedPin = localStorage.getItem('cardbills_app_pin');
+      const pinEnabled = localStorage.getItem('cardbills_pin_enabled') !== 'false'; // Default to true
 
       const authScreen = document.getElementById('authScreen');
       const lockScreen = document.getElementById('pinLockScreen');
@@ -350,7 +375,8 @@
       window.pinPadBackspace = function () {
         enteredPin = enteredPin.slice(0, -1);
         updatePinDots();
-        document.getElementById('pinErrorMsg').style.display = 'none';
+        const pinErrorMsg = document.getElementById('pinErrorMsg');
+        if (pinErrorMsg) pinErrorMsg.style.display = 'none';
       };
 
       function updatePinDots() {
@@ -362,16 +388,29 @@
       }
 
       function checkPin() {
-        if (enteredPin === savedPin) {
+        const currentSavedPin = localStorage.getItem('cardbills_app_pin');
+        const enteredHash = window.hashPin(enteredPin);
+
+        if (enteredHash === currentSavedPin || enteredPin === currentSavedPin) {
           // Correct PIN - unlock
+          if (enteredPin === currentSavedPin) {
+            localStorage.setItem('cardbills_app_pin', enteredHash);
+          }
           lockScreen.style.transition = 'opacity 0.4s ease';
           lockScreen.style.opacity = '0';
-          setTimeout(() => { lockScreen.style.display = 'none'; lockScreen.style.opacity = '1'; }, 400);
+          setTimeout(() => {
+            lockScreen.style.display = 'none';
+            lockScreen.style.opacity = '1';
+            enteredPin = '';
+            updatePinDots();
+            if (window.resetAutoLockTimer) window.resetAutoLockTimer();
+          }, 400);
         } else {
           // Wrong PIN
           const dots = document.querySelectorAll('.pin-dot');
           dots.forEach(d => { d.classList.remove('filled'); d.classList.add('error'); });
-          document.getElementById('pinErrorMsg').style.display = 'block';
+          const pinErrorMsg = document.getElementById('pinErrorMsg');
+          if (pinErrorMsg) pinErrorMsg.style.display = 'block';
           lockScreen.classList.add('shake');
           setTimeout(() => {
             lockScreen.classList.remove('shake');
@@ -387,6 +426,58 @@
         if (e.key >= '0' && e.key <= '9') window.pinPadPress(e.key);
         if (e.key === 'Backspace') window.pinPadBackspace();
       });
+
+      // Show PIN lock screen helper
+      window.showPinLockScreen = function () {
+        if (!lockScreen) return;
+        enteredPin = '';
+        updatePinDots();
+        const pinErr = document.getElementById('pinErrorMsg');
+        if (pinErr) pinErr.style.display = 'none';
+        lockScreen.style.opacity = '1';
+        lockScreen.style.display = 'flex';
+        lockScreen.style.flexDirection = 'column';
+      };
+
+      // 5-Minute Auto-Lock Inactivity Logic
+      let autoLockTimer = null;
+      const AUTO_LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes (300,000 ms)
+
+      window.resetAutoLockTimer = function () {
+        if (autoLockTimer) clearTimeout(autoLockTimer);
+
+        const isAuthUserCurrent = localStorage.getItem('cardbills_auth_user') === 'true';
+        const pinEnabledCurrent = localStorage.getItem('cardbills_pin_enabled') === 'true';
+        const savedPinCurrent = localStorage.getItem('cardbills_app_pin');
+
+        if (isAuthUserCurrent && pinEnabledCurrent && savedPinCurrent) {
+          autoLockTimer = setTimeout(function () {
+            const lockScrn = document.getElementById('pinLockScreen');
+            const authScrn = document.getElementById('authScreen');
+            if (lockScrn && lockScrn.style.display === 'none' && authScrn && authScrn.style.display === 'none') {
+              window.showPinLockScreen();
+            }
+          }, AUTO_LOCK_TIMEOUT_MS);
+        }
+      };
+
+      window.clearAutoLockTimer = function () {
+        if (autoLockTimer) clearTimeout(autoLockTimer);
+      };
+
+      // Reset inactivity timer on any user touch or interaction
+      const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'touchmove', 'click', 'scroll'];
+      activityEvents.forEach(function (evt) {
+        document.addEventListener(evt, function () {
+          const lockScrn = document.getElementById('pinLockScreen');
+          if (!lockScrn || lockScrn.style.display === 'none') {
+            window.resetAutoLockTimer();
+          }
+        }, { passive: true });
+      });
+
+      // Initialize timer on load
+      window.resetAutoLockTimer();
     })();
   </script>
 
@@ -1998,7 +2089,7 @@
           </div>
 
           <!-- Summary Cards -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
             <!-- Charges Pending -->
             <div
               style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;">
@@ -2031,25 +2122,7 @@
                 </svg>
               </div>
             </div>
-            <!-- Bills Pending -->
-            <div
-              style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <div style="font-size: 0.85rem; color: #6b7280; font-weight: 500; margin-bottom: 4px;">Bills Pending
-                </div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #111827;" id="cbBillsPending">₹0.00</div>
-              </div>
-              <div
-                style="width: 40px; height: 40px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #d97706;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-            </div>
+
             <!-- Customers Owe Us -->
             <div
               style="background: #fff5f5; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border: 1px solid #fed7d7;">
