@@ -4350,7 +4350,8 @@ window.savePinSettings = () => {
         return;
     }
 
-    localStorage.setItem('cardbills_app_pin', pin);
+    const hashed = window.hashPin ? window.hashPin(pin) : pin;
+    localStorage.setItem('cardbills_app_pin', hashed);
     localStorage.setItem('cardbills_pin_enabled', 'true');
 
     // Format current date and time for last changed
@@ -4358,7 +4359,9 @@ window.savePinSettings = () => {
     const dateStr = now.toLocaleDateString() + ' at ' + now.toLocaleTimeString();
     localStorage.setItem('cardbills_pin_last_changed', dateStr);
 
-    alert('PIN saved successfully! 🔒');
+    if (window.resetAutoLockTimer) window.resetAutoLockTimer();
+
+    alert('PIN saved successfully! 🔒 Security enabled with 5-minute auto-lock when screen is idle.');
     window.renderPinSettings();
 };
 
@@ -4960,9 +4963,11 @@ window.renderPinSettings = () => {
                   Active
                </div>
             </div>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #475569;">
-               <strong>PIN last changed:</strong> ${lastChanged}
-            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 4px;">
+                <div><strong>PIN status:</strong> Enabled & Active 🔒</div>
+                <div><strong>Auto-Lock:</strong> Automatically locks after <strong>5 minutes</strong> of inactivity (no touch / screen interaction)</div>
+                <div><strong>PIN last changed:</strong> ${lastChanged}</div>
+             </div>
          </div>
 
          <!-- PIN Management Card -->
@@ -5079,8 +5084,9 @@ window.showPinSetupForm = () => {
 window.disablePinSecurity = () => {
     if (confirm('Are you sure you want to disable PIN security? This will make the app accessible without any password.')) {
         localStorage.setItem('cardbills_pin_enabled', 'false');
+        if (window.clearAutoLockTimer) window.clearAutoLockTimer();
         window.renderPinSettings();
-        showToast('PIN security disabled', 'info');
+        if (typeof showToast === 'function') showToast('PIN security disabled', 'info');
     }
 };
 
@@ -5204,12 +5210,23 @@ function hideAuthScreen() {
         authScreen.style.opacity = '1';
 
         // Now evaluate PIN Lock logic
-        const pinEnabled = localStorage.getItem('cardbills_pin_enabled') === 'true';
-        const savedPin = localStorage.getItem('cardbills_app_pin');
+        const pinEnabled = localStorage.getItem('cardbills_pin_enabled') !== 'false';
+        let savedPin = localStorage.getItem('cardbills_app_pin');
+        if (!savedPin && window.hashPin) {
+            savedPin = window.hashPin('2012');
+            localStorage.setItem('cardbills_app_pin', savedPin);
+            localStorage.setItem('cardbills_pin_enabled', 'true');
+        }
         if (pinEnabled && savedPin) {
-            const lockScreen = document.getElementById('pinLockScreen');
-            lockScreen.style.display = 'flex';
-            lockScreen.style.flexDirection = 'column';
+            if (window.showPinLockScreen) {
+                window.showPinLockScreen();
+            } else {
+                const lockScreen = document.getElementById('pinLockScreen');
+                if (lockScreen) {
+                    lockScreen.style.display = 'flex';
+                    lockScreen.style.flexDirection = 'column';
+                }
+            }
         }
     }, 400);
 }
