@@ -644,11 +644,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Extra Profit Nav
     const navExtraProfit = document.getElementById('navExtraProfit');
     const extraProfitSection = document.getElementById('extraProfitSection');
-
-    if (loggedInEmail !== 'jayeshmaniya18@gmail.com') {
-        if (navExpenses) navExpenses.style.display = 'none';
-        if (navExtraProfit) navExtraProfit.style.display = 'none';
-    }
     const navPortalBalances = document.getElementById('nav-portal-balances');
     const allTransactionsSection = document.getElementById('allTransactionsSection');
     const portalBalancesSection = document.getElementById('portalBalancesSection');
