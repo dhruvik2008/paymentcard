@@ -5158,8 +5158,11 @@ window.handleAuthSubmit = (e) => {
                     localStorage.setItem('cardbills_logged_in_user_email', email);
 
                     // Clear any previous local storage keys for other users
-                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
-                    SYNC_KEYS.forEach(k => localStorage.removeItem(k));
+                    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings', 'cardbills_expenses', 'cardbills_extra_profit', 'cardbills_udhar'];
+                    SYNC_KEYS.forEach(k => {
+                        localStorage.removeItem(k);
+                        localStorage.removeItem('cardbills_firebase_synced_' + k);
+                    });
 
                     hideAuthScreen();
                     location.reload();
@@ -5177,7 +5180,7 @@ window.handleAuthSubmit = (e) => {
                 localStorage.setItem('cardbills_logged_in_user_email', email);
 
                 // Clear local storage for a fresh sync
-                const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
+                const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings', 'cardbills_expenses', 'cardbills_extra_profit', 'cardbills_udhar'];
                 SYNC_KEYS.forEach(k => {
                     localStorage.removeItem(k);
                     localStorage.removeItem('cardbills_firebase_synced_' + k);
@@ -5234,7 +5237,7 @@ function hideAuthScreen() {
 window.handleSignOut = () => {
     localStorage.removeItem('cardbills_auth_user');
     localStorage.removeItem('cardbills_logged_in_user_email');
-    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses', 'cardbills_extra_profit'];
+    const SYNC_KEYS = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_pdf_settings', 'cardbills_expenses', 'cardbills_extra_profit', 'cardbills_udhar'];
     SYNC_KEYS.forEach(k => {
         localStorage.removeItem(k);
         localStorage.removeItem('cardbills_firebase_synced_' + k);
