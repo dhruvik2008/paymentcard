@@ -87,9 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let filteredCustomers = customers.filter(c => {
             if (!c || typeof c.name !== 'string' || c.name.trim().length === 0) return false;
             if (query) {
+                const name = c.name.toLowerCase();
                 const phone = c.phone ? String(c.phone).toLowerCase() : '';
                 const email = c.email ? c.email.toLowerCase() : '';
-                return c.name.toLowerCase().includes(query) || phone.includes(query) || email.includes(query);
+                return name.includes(query) || phone.includes(query) || email.includes(query);
             }
             return true;
         });
@@ -98,10 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
         filteredCustomers.sort((a, b) => a.name.localeCompare(b.name));
 
         if (filteredCustomers.length > 0) {
-            const firstLetter = filteredCustomers[0].name.charAt(0).toUpperCase();
+            const firstLetter = query ? `Search Results (${filteredCustomers.length})` : filteredCustomers[0].name.charAt(0).toUpperCase();
             listHeaderGroup.textContent = firstLetter;
         } else {
-            listHeaderGroup.textContent = 'No Customers';
+            listHeaderGroup.textContent = 'No Customers Found';
         }
 
         filteredCustomers.forEach(customer => {
@@ -110,7 +111,22 @@ document.addEventListener('DOMContentLoaded', () => {
             row.className = 'customer-row';
             row.innerHTML = `
         <div class="avatar">${initial}</div>
-        <div class="customer-name">${customer.name}</div>
+        <div class="customer-info" style="display: flex; align-items: center; justify-content: space-between; flex: 1; min-width: 0; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span class="customer-name" style="font-size: 0.95rem; font-weight: 600; color: #1e1b4b;">${customer.name}</span>
+                ${customer.phone ? `
+                <span class="customer-phone-badge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 600; color: #4338ca; background: #eef2ff; padding: 3px 10px; border-radius: 20px; border: 1px solid #c7d2fe;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="color: #6366f1;">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    ${customer.phone}
+                </span>` : ''}
+            </div>
+            ${customer.cards && customer.cards.length > 0 ? `
+            <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px;">
+                ${customer.cards.length} card${customer.cards.length > 1 ? 's' : ''}
+            </span>` : ''}
+        </div>
         `;
             row.addEventListener('click', () => openViewDrawer(customer, customers.indexOf(customer)));
             customerListBody.appendChild(row);
@@ -2790,7 +2806,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedCustomers.forEach((cust, index) => {
             const option = document.createElement('option');
             option.value = index;
-            option.textContent = cust.name;
+            option.textContent = cust.phone ? `${cust.name} (${cust.phone})` : cust.name;
             wizardCustomer.appendChild(option);
         });
     };
@@ -3088,7 +3104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         customers.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.name;
-            opt.textContent = c.name;
+            opt.textContent = c.phone ? `${c.name} (${c.phone})` : c.name;
             subUserSelect.appendChild(opt);
         });
     };
@@ -3153,7 +3169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customers.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.name;
-                opt.textContent = c.name;
+                opt.textContent = c.phone ? `${c.name} (${c.phone})` : c.name;
                 glCustomerFilter.appendChild(opt);
             });
         }
