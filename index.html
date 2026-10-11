@@ -465,15 +465,15 @@
         if (autoLockTimer) clearTimeout(autoLockTimer);
       };
 
-      // Reset inactivity timer on any user touch or interaction
-      const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'touchmove', 'click', 'scroll'];
+      // Reset inactivity timer on any user touch, scroll, or interaction on this website
+      const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'touchmove', 'touchend', 'click', 'scroll', 'wheel'];
       activityEvents.forEach(function (evt) {
-        document.addEventListener(evt, function () {
+        window.addEventListener(evt, function () {
           const lockScrn = document.getElementById('pinLockScreen');
           if (!lockScrn || lockScrn.style.display === 'none') {
             window.resetAutoLockTimer();
           }
-        }, { passive: true });
+        }, { capture: true, passive: true });
       });
 
       // Initialize timer on load
@@ -4348,7 +4348,7 @@
   <script src="firebase.js"></script>
   <script src="sync.js?v=28"></script>
   <script src="reports_logic.js?v=30"></script>
-  <script src="script.js?v=30"></script>
+  <script src="script.js?v=31"></script>
 </body>
 
 </html>
