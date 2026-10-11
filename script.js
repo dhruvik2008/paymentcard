@@ -1134,17 +1134,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 0);
         }
 
-        const pendingBill = Math.max(0, billTotal - paidTotal);
+        let pendingBill = calculatePendingAmount(tx.raw);
+        if (tx.isSettled) pendingBill = 0;
+
+        let displayPaidTotal = paidTotal;
+        if (pendingBill > 0 && debitTotal > 0) {
+            if (paidTotal > debitTotal) {
+                displayPaidTotal = debitTotal;
+            } else if (billTotal > 0 && paidTotal >= billTotal) {
+                displayPaidTotal = Math.max(0, billTotal - pendingBill);
+            }
+        }
 
         // Formatter
         const fmt = (num) => `₹${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
         // Financial Summary
         document.getElementById('viewTxTotalBill').textContent = fmt(billTotal);
-        document.getElementById('viewTxPaymentRecv').textContent = fmt(paidTotal);
+        document.getElementById('viewTxPaymentRecv').textContent = fmt(displayPaidTotal);
         document.getElementById('viewTxAmountDebited').textContent = fmt(debitTotal);
 
-        const paidPct = billTotal > 0 ? Math.min(100, (paidTotal / billTotal) * 100) : 0;
+        const paidPct = billTotal > 0 ? Math.min(100, (displayPaidTotal / billTotal) * 100) : 0;
 
         document.getElementById('viewTxPaymentBar').style.width = `${paidPct}%`;
         document.getElementById('viewTxPaymentPct').textContent = `${paidPct.toFixed(1)}% of bill amount`;
@@ -2361,6 +2371,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     let pendingAmt = calculatePendingAmount(tx.raw);
                     if (tx.isSettled) pendingAmt = 0;
 
+                    let displayReceived = paidAmt;
+                    if (pendingAmt > 0 && debitAmt > 0) {
+                        if (paidAmt > debitAmt) {
+                            displayReceived = debitAmt;
+                        } else if (billAmt > 0 && paidAmt >= billAmt) {
+                            displayReceived = Math.max(0, billAmt - pendingAmt);
+                        }
+                    }
+
                     const totalCharges = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => s + (parseFloat(d.charges) || 0), 0) : 0;
                     const paidCharges = tx.raw && tx.raw.debits ? tx.raw.debits.reduce((s, d) => {
                         let status = (d.chargesStatus || '').toLowerCase();
@@ -2379,7 +2398,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:12px;">
                   <span style="color:#6b7280;">Received:</span>
-                  <span style="font-weight:600;color:#10b981;">₹${paidAmt.toLocaleString('en-IN')}</span>
+                  <span style="font-weight:600;color:#10b981;">₹${displayReceived.toLocaleString('en-IN')}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:12px;">
                   <span style="color:#6b7280;">Paid to Card:</span>
