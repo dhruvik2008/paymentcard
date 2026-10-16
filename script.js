@@ -5308,6 +5308,212 @@ window.exportBackupFile = () => {
     showToast('Backup file downloaded successfully', 'success');
 };
 
+// ==========================================
+// Customers & All Cards Export & Import Logic
+// ==========================================
+window.exportCustomersAndCards = () => {
+    let custData = [];
+    try {
+        custData = JSON.parse(localStorage.getItem('cardbills_customers') || '[]');
+    } catch (e) {
+        custData = [];
+    }
+
+    if ((!custData || custData.length === 0) && typeof customers !== 'undefined' && Array.isArray(customers)) {
+        custData = customers;
+    }
+
+    if (!custData || custData.length === 0) {
+        showToast('No customer data found to export.', 'warning');
+        return;
+    }
+
+    let totalCards = 0;
+    custData.forEach(c => {
+        if (c && c.cards && Array.isArray(c.cards)) {
+            totalCards += c.cards.length;
+        }
+    });
+
+    const exportPayload = {
+        export_type: 'customers_and_cards',
+        app: 'Maniya Enterprise',
+        version: '1.0',
+        exported_at: new Date().toISOString(),
+        exported_by: localStorage.getItem('cardbills_logged_in_user_email') || 'User',
+        total_customers: custData.length,
+        total_cards: totalCards,
+        cardbills_customers: custData
+    };
+
+    const jsonStr = JSON.stringify(exportPayload, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `maniya_customers_and_cards_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast(`Exported ${custData.length} customers and ${totalCards} cards successfully!`, 'success');
+};
+
+let pendingImportCustomers = null;
+
+window.importCustomersAndCards = (event) => {
+    const file = event.target && event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            let importedList = null;
+
+            if (Array.isArray(data)) {
+                importedList = data;
+            } else if (Array.isArray(data.cardbills_customers)) {
+                importedList = data.cardbills_customers;
+            } else if (data.customers && Array.isArray(data.customers)) {
+                importedList = data.customers;
+            }
+
+            if (!importedList || !Array.isArray(importedList) || importedList.length === 0) {
+                alert('Invalid file format. No customer records found in file.');
+                if (event.target) event.target.value = '';
+                return;
+            }
+
+            let totalCards = 0;
+            importedList.forEach(c => {
+                if (c && c.cards && Array.isArray(c.cards)) {
+                    totalCards += c.cards.length;
+                }
+            });
+
+            let currentList = [];
+            try {
+                currentList = JSON.parse(localStorage.getItem('cardbills_customers') || '[]');
+            } catch (err) {
+                currentList = [];
+            }
+            if ((!currentList || currentList.length === 0) && typeof customers !== 'undefined' && Array.isArray(customers)) {
+                currentList = customers;
+            }
+
+            pendingImportCustomers = importedList;
+
+            const modal = document.getElementById('customerImportModal');
+            if (modal) {
+                const countVal = document.getElementById('custImportCountVal');
+                const cardsVal = document.getElementById('custImportCardsCountVal');
+                const curVal = document.getElementById('custCurrentCountVal');
+                const summary = document.getElementById('custImportSummaryText');
+
+                if (countVal) countVal.textContent = importedList.length;
+                if (cardsVal) cardsVal.textContent = totalCards;
+                if (curVal) curVal.textContent = currentList.length;
+                if (summary) summary.textContent = `Found ${importedList.length} customers and ${totalCards} cards ready to import.`;
+
+                modal.style.display = 'flex';
+            } else {
+                const msg = `Found ${importedList.length} customers with ${totalCards} cards.\n\nDo you want to import and replace current customers in this account?\n(Current customers: ${currentList.length})`;
+                if (confirm(msg)) {
+                    window.executeCustomerImport('replace');
+                }
+            }
+        } catch (err) {
+            alert('Error reading JSON file: ' + err.message);
+        }
+        if (event.target) event.target.value = '';
+    };
+    reader.readAsText(file);
+};
+
+window.closeCustomerImportModal = () => {
+    const modal = document.getElementById('customerImportModal');
+    if (modal) modal.style.display = 'none';
+    pendingImportCustomers = null;
+};
+
+window.executeCustomerImport = (mode) => {
+    if (!pendingImportCustomers || !Array.isArray(pendingImportCustomers)) {
+        showToast('No customer data to import.', 'error');
+        window.closeCustomerImportModal();
+        return;
+    }
+
+    let finalCustomers = [];
+    if (mode === 'replace') {
+        finalCustomers = pendingImportCustomers;
+    } else {
+        // Merge mode
+        let currentList = [];
+        try {
+            currentList = JSON.parse(localStorage.getItem('cardbills_customers') || '[]');
+        } catch (e) {
+            currentList = [];
+        }
+        const seenNames = new Map();
+        finalCustomers = [];
+
+        currentList.forEach(c => {
+            if (!c || !c.name) return;
+            const lower = c.name.trim().toLowerCase();
+            seenNames.set(lower, finalCustomers.length);
+            finalCustomers.push(JSON.parse(JSON.stringify(c)));
+        });
+
+        pendingImportCustomers.forEach(c => {
+            if (!c || !c.name) return;
+            const lower = c.name.trim().toLowerCase();
+            if (seenNames.has(lower)) {
+                const existing = finalCustomers[seenNames.get(lower)];
+                if (!existing.cards) existing.cards = [];
+                if (c.cards && Array.isArray(c.cards)) {
+                    c.cards.forEach(newCard => {
+                        const exists = existing.cards.some(ec =>
+                            (ec.bank || '').toLowerCase() === (newCard.bank || '').toLowerCase() &&
+                            (ec.last || '') === (newCard.last || '')
+                        );
+                        if (!exists) existing.cards.push(newCard);
+                    });
+                }
+                if (!existing.phone && c.phone) existing.phone = c.phone;
+                if (!existing.email && c.email) existing.email = c.email;
+                if (!existing.address && c.address) existing.address = c.address;
+                if (!existing.referenceName && c.referenceName) existing.referenceName = c.referenceName;
+                if (!existing.referencePhone && c.referencePhone) existing.referencePhone = c.referencePhone;
+            } else {
+                seenNames.set(lower, finalCustomers.length);
+                finalCustomers.push(JSON.parse(JSON.stringify(c)));
+            }
+        });
+    }
+
+    let totalCards = 0;
+    finalCustomers.forEach(c => {
+        if (c && c.cards && Array.isArray(c.cards)) totalCards += c.cards.length;
+    });
+
+    localStorage.setItem('cardbills_customers', JSON.stringify(finalCustomers));
+
+    if (typeof customers !== 'undefined') {
+        customers = finalCustomers;
+    }
+
+    window.closeCustomerImportModal();
+
+    showToast(`Imported ${finalCustomers.length} customers and ${totalCards} cards successfully! Syncing...`, 'success');
+
+    setTimeout(() => {
+        location.reload();
+    }, 1200);
+};
+
 window.importBackupFile = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -5315,10 +5521,21 @@ window.importBackupFile = (event) => {
     reader.onload = (e) => {
         try {
             const backupData = JSON.parse(e.target.result);
+
+            // Automatically detect customer-only backup
+            const isCustomerOnly = (backupData.export_type === 'customers_and_cards') ||
+                (Array.isArray(backupData.cardbills_customers) && !backupData.cardbills_transactions);
+            if (isCustomerOnly) {
+                window.importCustomersAndCards({ target: { files: [file] } });
+                event.target.value = '';
+                return;
+            }
+
             const keys = ['cardbills_customers', 'cardbills_transactions', 'cardbills_ledger_entries', 'cardbills_portals', 'cardbills_expenses'];
             const hasRequiredKeys = keys.every(key => Array.isArray(backupData[key]));
             if (!hasRequiredKeys) {
                 alert('Invalid backup file. Missing required data arrays.');
+                event.target.value = '';
                 return;
             }
             if (confirm('Are you sure you want to restore this backup? This will replace all your current data on this device and on Firebase.')) {
@@ -5338,6 +5555,7 @@ window.importBackupFile = (event) => {
         } catch (err) {
             alert('Error parsing backup file: ' + err.message);
         }
+        event.target.value = '';
     };
     reader.readAsText(file);
 };
