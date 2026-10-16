@@ -923,6 +923,28 @@
               </svg>
               Add
             </button>
+            <button class="btn" id="exportCustomersBtn" onclick="window.exportCustomersAndCards()"
+              style="background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);"
+              title="Export all customers & cards data">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Export Customers & Cards
+            </button>
+            <button class="btn" id="importCustomersBtn" onclick="document.getElementById('quickImportCustomersInput').click()"
+              style="background: #ffffff; border: 1.5px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;"
+              title="Import customers & cards into this account">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Import
+            </button>
+            <input type="file" id="quickImportCustomersInput" accept=".json" style="display: none;"
+              onchange="window.importCustomersAndCards(event)">
           </div>
 
           <div class="customers-list">
@@ -3197,7 +3219,19 @@
       <!-- ALL CARDS SECTION -->
       <div id="allCardsSection" class="page-section" style="display: none; flex-direction: column; overflow: hidden;">
         <div style="flex: 1; overflow-y: auto; padding: 20px 32px;">
-        <h2 style="font-size: 1.8rem; font-weight: 700; color: #111827; margin: 0 0 24px 0;">Credit Cards</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+          <h2 style="font-size: 1.8rem; font-weight: 700; color: #111827; margin: 0;">Credit Cards</h2>
+          <button class="btn" onclick="window.exportCustomersAndCards()"
+            style="background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);"
+            title="Export all cards & customer data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export All Cards & Customers
+          </button>
+        </div>
 
         <!-- Filters -->
         <div
@@ -3651,7 +3685,7 @@
                 (customers, transactions, ledger, and portals) to save on your computer, or import a previously saved
                 backup file to restore it.</p>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
                 <!-- Export Box -->
                 <div
                   style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #f9fafb;">
@@ -3665,7 +3699,7 @@
                       </svg>
                     </div>
                     <div>
-                      <h4 style="margin: 0; font-weight: 700; color: #111827;">Export Backup</h4>
+                      <h4 style="margin: 0; font-weight: 700; color: #111827;">Full Export Backup</h4>
                       <span style="font-size: 0.75rem; color: #6b7280;">Download all current data as JSON</span>
                     </div>
                   </div>
@@ -3673,7 +3707,7 @@
                     customer records, transactions, ledger entries, and portal configuration settings.</p>
                   <button onclick="window.exportBackupFile()"
                     style="margin-top: auto; background: #6366f1; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);">
-                    Download Backup
+                    Download Full Backup
                   </button>
                 </div>
 
@@ -3690,7 +3724,7 @@
                       </svg>
                     </div>
                     <div>
-                      <h4 style="margin: 0; font-weight: 700; color: #111827;">Restore Backup</h4>
+                      <h4 style="margin: 0; font-weight: 700; color: #111827;">Full Restore Backup</h4>
                       <span style="font-size: 0.75rem; color: #6b7280;">Upload a backup file</span>
                     </div>
                   </div>
@@ -3702,6 +3736,64 @@
                     style="margin-top: auto; background: white; border: 1.5px solid #d1d5db; color: #374151; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     Choose File & Restore
                   </button>
+                </div>
+              </div>
+
+              <!-- Dedicated Customers & Cards Only Section -->
+              <div style="border-top: 1px solid #e5e7eb; padding-top: 24px;">
+                <div style="margin-bottom: 16px;">
+                  <h4 style="margin: 0 0 4px 0; font-size: 1.05rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #059669;"></span>
+                    Customer & Cards Only (For Other Accounts / IDs)
+                  </h4>
+                  <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Export or import only customer profiles and credit/debit cards without transactions, ledger, or portal records. Perfect for copying your customer list and all cards to another ID.</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                  <!-- Export Customers & Cards Box -->
+                  <div style="border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #f0fdf4;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 40px; height: 40px; border-radius: 8px; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 style="margin: 0; font-weight: 700; color: #065f46;">Export Customers & Cards</h4>
+                        <span style="font-size: 0.75rem; color: #047857;">Customer profiles and all cards as JSON</span>
+                      </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #065f46; margin: 0;">Generates a clean JSON file containing all customer names, phone numbers, and all card details only.</p>
+                    <button onclick="window.exportCustomersAndCards()" style="margin-top: auto; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                      </svg>
+                      Download Customers & Cards
+                    </button>
+                  </div>
+
+                  <!-- Import Customers & Cards Box -->
+                  <div style="border: 1px solid #e0e7ff; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #f5f3ff;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 40px; height: 40px; border-radius: 8px; background: #ede9fe; color: #7c3aed; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 style="margin: 0; font-weight: 700; color: #4c1d95;">Import Customers & Cards</h4>
+                        <span style="font-size: 0.75rem; color: #6d28d9;">Restore into this ID / Account</span>
+                      </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #5b21b6; margin: 0;">Upload customer & cards JSON file into this account. Will immediately sync to this ID's Firebase database.</p>
+                    <input type="file" id="importCustOnlyFileInput" accept=".json" style="display: none;" onchange="window.importCustomersAndCards(event)">
+                    <button onclick="document.getElementById('importCustOnlyFileInput').click()" style="margin-top: auto; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12"></path>
+                      </svg>
+                      Choose File & Import
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3718,10 +3810,64 @@
     style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px;">
   </div>
 
+  <!-- Customers & Cards Import Modal (Replace vs Merge Option) -->
+  <div class="modal" id="customerImportModal"
+    style="display: none; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10002;">
+    <div
+      style="background: white; border-radius: 20px; width: 480px; max-width: 92vw; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; animation: pinFadeInUp 0.3s ease;">
+      
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">Import Customers & Cards</h3>
+          <p id="custImportSummaryText" style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Ready to import customers and cards.</p>
+        </div>
+      </div>
 
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 0.85rem; color: #64748b;">Importing Customers:</span>
+          <span id="custImportCountVal" style="font-size: 0.85rem; font-weight: 700; color: #0f172a;">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 0.85rem; color: #64748b;">Total Cards Attached:</span>
+          <span id="custImportCardsCountVal" style="font-size: 0.85rem; font-weight: 700; color: #059669;">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="font-size: 0.85rem; color: #64748b;">Current Existing Customers:</span>
+          <span id="custCurrentCountVal" style="font-size: 0.85rem; font-weight: 700; color: #3b82f6;">0</span>
+        </div>
+      </div>
 
+      <p style="font-size: 0.85rem; color: #475569; margin: 0 0 20px 0; line-height: 1.4;">
+        Choose how you would like to apply this data into your current account:
+      </p>
 
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button onclick="window.executeCustomerImport('replace')"
+          style="background: #059669; color: white; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+          <span>Replace All Customers (Clean Import)</span>
+          <span style="font-size: 0.75rem; background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 6px;">Recommended for New ID</span>
+        </button>
 
+        <button onclick="window.executeCustomerImport('merge')"
+          style="background: #ffffff; border: 1.5px solid #cbd5e1; color: #1e293b; padding: 12px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+          <span>Merge with Existing Customers</span>
+          <span style="font-size: 0.75rem; color: #64748b;">Keep both</span>
+        </button>
+
+        <button onclick="window.closeCustomerImportModal()"
+          style="background: transparent; border: none; color: #94a3b8; padding: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin-top: 4px;">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Daily Settlement Modal -->
   <div class="modal" id="settlementModal"
@@ -4348,7 +4494,7 @@
   <script src="firebase.js"></script>
   <script src="sync.js?v=28"></script>
   <script src="reports_logic.js?v=30"></script>
-  <script src="script.js?v=31"></script>
+  <script src="script.js?v=32"></script>
 </body>
 
 </html>
