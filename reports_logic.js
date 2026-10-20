@@ -28,13 +28,25 @@
   }
 
   const activateReportSection = (sectionId, breadcrumbText, navId) => {
+    if (typeof window.closeMobileSidebar === 'function') {
+      window.closeMobileSidebar();
+    }
+    if (window.navHistory && window.navHistory[window.navHistory.length - 1] !== sectionId) {
+      window.navHistory.push(sectionId);
+    }
+    const appBackBtn = document.getElementById('appBackBtn');
+    if (appBackBtn) appBackBtn.style.display = (sectionId === 'dashboardSection') ? 'none' : 'inline-flex';
+
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if(navId) {
-      document.getElementById(navId).classList.add('active');
+      const el = document.getElementById(navId);
+      if (el) el.classList.add('active');
     }
     document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
-    document.getElementById(sectionId).style.display = 'flex';
-    document.getElementById('breadcrumbCurrent').textContent = breadcrumbText;
+    const sec = document.getElementById(sectionId);
+    if (sec) sec.style.display = 'flex';
+    const bc = document.getElementById('breadcrumbCurrent');
+    if (bc) bc.textContent = breadcrumbText;
   };
 
   if (navCustomerBalances) {
