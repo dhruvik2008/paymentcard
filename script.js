@@ -753,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sectionId === 'dashboardSection' && typeof renderDashboard === 'function') renderDashboard();
         if (sectionId === 'customersSection' && typeof renderCustomers === 'function') renderCustomers();
         if (sectionId === 'allTransactionsSection' && typeof renderAllTransactions === 'function') renderAllTransactions();
+        if (sectionId === 'transactionsSection' && typeof renderTransactions === 'function') renderTransactions();
         if (sectionId === 'customerBalancesSection' && typeof renderCustomerBalancesReport === 'function') renderCustomerBalancesReport();
 
         showSection(sectionEl);
@@ -1129,12 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navTransactionBills.addEventListener('click', (e) => {
         e.preventDefault();
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        navTransactionsGroup.classList.add('active');
-        navTransactionBills.classList.add('active');
-        showSection(transactionsSection);
-        breadcrumbCurrent.textContent = 'Transaction Bills';
-        renderTransactions();
+        window.navGoTo('transactionsSection', 'Transaction Bills');
     });
 
     // ==========================================
@@ -2473,24 +2469,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-      <td>
+      <td data-label="Date">
         <div class="detail-line">
           <span style="font-weight: 500;">${tx.date}</span>
           <span class="text-muted">${tx.time}</span>
         </div>
       </td>
-      <td>
+      <td data-label="Customer">
         <div class="detail-line">
-          <span style="font-weight: 500; font-size: 0.85rem;">${tx.customerName}</span>
-          <span class="text-muted" style="font-size: 0.75rem;">${tx.customerPhone}</span>
+          <span style="font-weight: 600; font-size: 0.95rem; color: #1e1b4b;">${tx.customerName}</span>
+          <span class="text-muted" style="font-size: 0.8rem;">${tx.customerPhone}</span>
         </div>
       </td>
-      <td>
+      <td data-label="Card">
         <div class="detail-line">
-          <span style="font-weight: 500; color: #4f46e5; font-size: 0.85rem;">${tx.bank} ••••${tx.cardSuffix}</span>
+          <span style="font-weight: 600; color: #4f46e5; font-size: 0.85rem;">${tx.bank} ••••${tx.cardSuffix}</span>
         </div>
       </td>
-      <td>
+      <td data-label="Amounts">
         <div class="detail-line">
           ${(() => {
                     const billAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
@@ -2547,7 +2543,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })()}
         </div>
       </td>
-      <td>
+      <td data-label="Pending">
         ${(() => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
@@ -2559,7 +2555,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </span>`;
                 })()}
       </td>
-      <td>
+      <td data-label="Status">
         ${(() => {
                     const bAmt = parseFloat((tx.raw && tx.raw.billTotal) ? tx.raw.billTotal : (tx.bill || 0)) || 0;
                     const pAmt = tx.raw && tx.raw.payments ? tx.raw.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
@@ -2582,17 +2578,17 @@ document.addEventListener('DOMContentLoaded', () => {
           </span>`;
                 })()}
       </td>
-      <td>
+      <td data-label="Profit">
         <div class="detail-line">
           <span style="color: ${_profitColor}; font-weight: 600; font-size: 0.85rem;">${_profitStr} Profit</span>
           <span class="text-muted" style="font-size: 0.75rem;">${_chargesStr} Charges</span>
         </div>
       </td>
-      <td>
+      <td data-label="Actions">
         <div class="actions">
-          <svg onclick="actionInvoice(${index})" class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-          <svg onclick="actionEdit(${index})" class="action-icon edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-          <svg onclick="actionDelete(${index})" class="action-icon delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          <svg onclick="actionInvoice(${index})" class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Invoice"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg onclick="actionEdit(${index})" class="action-icon edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <svg onclick="actionDelete(${index})" class="action-icon delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Delete"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
         </div>
       </td>
     `;
