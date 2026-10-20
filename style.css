@@ -993,7 +993,7 @@ body {
 }
 
 /* ==============================
-   RESPONSIVE
+   RESPONSIVE - Tablet
    ============================== */
 @media (max-width: 768px) {
   .sidebar { width: 60px; }
@@ -1004,6 +1004,91 @@ body {
   .nav-item.has-submenu .chevron { display: none; }
   .drawer { width: 100%; right: -100%; }
 }
+
+/* ==============================
+   RESPONSIVE - Mobile (Phone)
+   ============================== */
+@media (max-width: 480px) {
+  /* Hide desktop sidebar completely */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Main content takes full width */
+  .app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    width: 100vw;
+    flex: 1;
+  }
+
+  /* Reduce top header padding */
+  .top-header {
+    padding: 10px 16px;
+  }
+
+  /* Reduce page content padding */
+  .page-content {
+    padding: 16px 14px;
+    padding-bottom: 80px; /* Space for bottom nav */
+  }
+
+  /* Drawer full width on mobile */
+  .drawer { width: 100% !important; right: -100% !important; }
+
+  /* --- Hamburger menu button (top left) --- */
+  #mobileMenuBtn {
+    display: flex !important;
+  }
+
+  /* --- Mobile sidebar overlay --- */
+  #mobileSidebarOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  #mobileSidebarOverlay.open {
+    display: block;
+  }
+  #mobileSidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100%;
+    z-index: 1000;
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  #mobileSidebar.open {
+    left: 0;
+  }
+  #mobileSidebar .sidebar-logo span,
+  #mobileSidebar .nav-item span {
+    display: inline !important;
+  }
+  #mobileSidebar .nav-item {
+    padding: 11px 14px !important;
+    justify-content: flex-start !important;
+  }
+  #mobileSidebar .nav-item svg {
+    margin-right: 11px !important;
+  }
+  #mobileSidebar .nav-item.has-submenu .chevron {
+    display: block !important;
+  }
+}
+
 
 /* ==============================
    TRANSACTIONS TABLE
