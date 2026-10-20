@@ -977,6 +977,38 @@ html, body {
   position: relative;
 }
 
+/* Mobile Header Logo (shown only on mobile, centered in top bar) */
+.mobile-header-logo {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.mobile-header-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-header-logo-wrap svg {
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.18));
+  flex-shrink: 0;
+}
+
+.mobile-header-logo-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  background: linear-gradient(135deg, #B38728 0%, #FBF5B7 50%, #B38728 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
 /* Mobile Hamburger Button */
 .mobile-menu-btn {
   display: none;
@@ -1204,6 +1236,10 @@ html, body {
     display: flex;
   }
 
+  .mobile-header-logo {
+    display: flex;
+  }
+
   .sidebar {
     position: fixed;
     top: 0;
@@ -1258,6 +1294,11 @@ html, body {
 
   .top-header {
     padding: max(14px, env(safe-area-inset-top)) 16px 12px 16px;
+  }
+
+  /* Hide breadcrumbs on mobile — logo is centered in header instead */
+  .breadcrumbs {
+    display: none;
   }
 
   .page-content {
