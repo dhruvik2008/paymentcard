@@ -518,6 +518,12 @@
         <span
           style="font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MANIYA
           ENTERPRISE</span>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" type="button" aria-label="Close Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <nav class="sidebar-nav">
@@ -687,20 +693,37 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <header class="top-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
+      <header class="top-header" id="appTopHeader">
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
           <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Open Navigation Menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="22" height="22">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="20" height="20">
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
+            <span class="mobile-menu-label">Menu</span>
           </button>
+
+          <button id="appBackBtn" class="app-back-btn" type="button" aria-label="Go Back" onclick="window.navigateBack()" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+
           <div class="breadcrumbs" id="breadcrumbs">
-            <span>Home</span> / <span>Apps</span> / <span class="current" id="breadcrumbCurrent">Customers</span>
+            <span>Home</span> / <span class="current" id="breadcrumbCurrent">Dashboard</span>
           </div>
         </div>
 
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" onclick="window.navGoTo('customerBalancesSection', 'Customer Balances')" class="header-quick-pill" title="Customer Balances">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>Balances</span>
+          </button>
+        </div>
       </header>
 
       <!-- Customers Section -->
@@ -4502,6 +4525,53 @@
 
     </div>
   </div>
+
+  <!-- Mobile Bottom App Bar -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="bnav-item active" id="bnavDashboard" type="button" onclick="window.navGoTo('dashboardSection', 'Dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <rect x="3" y="3" width="7" height="9"></rect>
+        <rect x="14" y="3" width="7" height="5"></rect>
+        <rect x="14" y="12" width="7" height="9"></rect>
+        <rect x="3" y="16" width="7" height="5"></rect>
+      </svg>
+      <span>Home</span>
+    </button>
+
+    <button class="bnav-item" id="bnavCustomers" type="button" onclick="window.navGoTo('customersSection', 'Customers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <span>Customers</span>
+    </button>
+
+    <button class="bnav-item" id="bnavTransactions" type="button" onclick="window.navGoTo('allTransactionsSection', 'All Transactions')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span>Txns</span>
+    </button>
+
+    <button class="bnav-item" id="bnavBalances" type="button" onclick="window.navGoTo('customerBalancesSection', 'Customer Balances')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <span>Balances</span>
+    </button>
+
+    <button class="bnav-item" id="bnavMenu" type="button" onclick="window.toggleMobileSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <span>Menu</span>
+    </button>
+  </nav>
 
   <!-- Firebase CDN (compat version - works on file:// protocol) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
