@@ -83,20 +83,10 @@
 body {
   font-family: var(--font-family);
   background: #a6c6ff;
+  /* background-size and animation removed for a clean solid look */
   color: var(--text-main);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  min-height: 100dvh;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 
 @keyframes gradientBG {
@@ -111,10 +101,8 @@ html {
 .app-container {
   display: flex;
   height: 100vh;
-  height: 100dvh;
   width: 100vw;
   overflow: hidden;
-  position: relative;
 }
 
 /* ==============================
@@ -966,17 +954,307 @@ html {
   color: var(--text-muted);
 }
 
+/* Base App Sizing & Touch Optimizations */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Mobile Hamburger Button */
+.mobile-menu-btn {
+  display: none;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: #1e1b4b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.95);
+  background: #f1f5f9;
+}
+
+/* Backdrop Overlay for mobile sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Responsive Customer Balances Cards Grid */
+#cbGrid, .cb-cards-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cb-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Dashboard Grids */
+.dashboard-fin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+}
+
+.dashboard-chart-inner-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Tables horizontal auto-scrolling */
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* ==============================
-   RESPONSIVE
+   RESPONSIVE (MOBILE & TABLET APP)
    ============================== */
-@media (max-width: 768px) {
-  .sidebar { width: 60px; }
-  .sidebar-logo span, .nav-item span { display: none; }
-  .sidebar-logo { padding: 24px 14px; }
-  .nav-item { padding: 12px; justify-content: center; }
-  .nav-item svg { margin-right: 0; }
-  .nav-item.has-submenu .chevron { display: none; }
-  .drawer { width: 100%; right: -100%; }
+@media (max-width: 900px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px !important;
+    max-width: 85vw;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.25);
+    background: #ffffff;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-logo span, .nav-item span {
+    display: inline !important;
+  }
+
+  .sidebar-logo {
+    padding: 20px 18px;
+  }
+
+  .nav-item {
+    padding: 12px 14px;
+    justify-content: flex-start;
+  }
+
+  .nav-item svg {
+    margin-right: 12px;
+  }
+
+  .nav-item.has-submenu .chevron {
+    display: block;
+  }
+
+  .main-content {
+    width: 100vw;
+    max-width: 100%;
+  }
+
+  .top-header {
+    padding: 12px 16px;
+  }
+
+  .page-content {
+    padding: 18px 16px;
+  }
+
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-header {
+    padding: 10px 12px;
+  }
+
+  .breadcrumbs {
+    font-size: 0.78rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+  }
+
+  .page-content {
+    padding: 14px 10px;
+    gap: 16px !important;
+  }
+
+  .page-title {
+    font-size: 1.3rem;
+  }
+
+  /* Customer Balances on Mobile */
+  #cbGrid, .cb-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .cb-summary-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Dashboard Stats on Mobile */
+  .dashboard-fin-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-fin-grid > div:last-child {
+    grid-column: span 2;
+  }
+
+  .dashboard-fin-grid h3 {
+    font-size: 1.35rem !important;
+  }
+
+  .dashboard-status-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-status-grid h2 {
+    font-size: 1.6rem !important;
+  }
+
+  .dashboard-chart-inner-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Search & Actions on Mobile */
+  .search-bar-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-bar-container .btn {
+    width: 100%;
+  }
+
+  /* Mobile Drawers (Add Customer, View Customer, Settle, etc.) */
+  .drawer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    right: -100vw !important;
+    border-radius: 0 !important;
+  }
+
+  .drawer.active {
+    right: 0 !important;
+  }
+
+  .drawer-content {
+    padding: 24px 16px 80px 16px !important;
+  }
+
+  /* Wizard / Modal on Mobile */
+  .wizard-modal {
+    padding: 0 !important;
+  }
+
+  .wizard-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .wizard-header {
+    padding: 16px !important;
+  }
+
+  .wizard-body {
+    padding: 16px !important;
+  }
+
+  .wizard-footer {
+    padding: 12px 16px !important;
+  }
+
+  .card-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* Buttons on mobile */
+  .btn {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
 }
 
 /* ==============================
@@ -1793,201 +2071,4 @@ svg[viewBox="0 0 100 100"] {
     color: #6b7280;
     white-space: pre-wrap;
   }
-}
-
-/* ======================================================
-   MOBILE RESPONSIVE — App-like layout (≤ 768px)
-   ====================================================== */
-
-/* Hamburger Button */
-.hamburger-btn {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid var(--border-light);
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 8px;
-  flex-shrink: 0;
-  transition: all var(--transition-base);
-  -webkit-tap-highlight-color: transparent;
-}
-.hamburger-btn span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: var(--primary-dark);
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* Mobile header left group */
-.mobile-header-left {
-  display: none;
-  align-items: center;
-  gap: 10px;
-}
-.mobile-brand-logo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.mobile-brand-name {
-  font-weight: 800;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Sidebar Backdrop */
-.sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 10, 30, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 998;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.sidebar-backdrop.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* Mobile close btn inside sidebar */
-.sidebar-close-mobile {
-  display: none;
-  margin-left: auto;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1.5px solid var(--border-light);
-  border-radius: 8px;
-  width: 34px;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--primary-dark);
-  font-size: 18px;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ---- Mobile breakpoint ---- */
-@media (max-width: 768px) {
-  .hamburger-btn { display: flex; }
-  .mobile-header-left { display: flex; }
-  .sidebar-close-mobile { display: flex; }
-
-  /* Sidebar — slide-in overlay */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100dvh;
-    width: 280px;
-    max-width: 85vw;
-    z-index: 999;
-    transform: translateX(-100%);
-    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-
-  /* Sidebar logo row */
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    padding: 18px 16px;
-  }
-
-  /* Main content full width */
-  .main-content { width: 100%; flex: 1; min-width: 0; }
-
-  /* Top header */
-  .top-header {
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    min-height: 56px;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  /* Breadcrumb — show only current */
-  .breadcrumbs {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--primary-dark);
-  }
-
-  /* Page content padding */
-  .page-content { padding: 14px 12px; }
-
-  /* Drawer — bottom sheet */
-  .drawer {
-    width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 20px 20px 0 0 !important;
-    bottom: 0 !important;
-    top: auto !important;
-    right: 0 !important;
-    left: 0 !important;
-    max-height: 92dvh !important;
-  }
-
-  /* Modals */
-  .modal-content, .modal-box {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    border-radius: 18px;
-  }
-
-  /* Grid — single col */
-  #cbGrid { grid-template-columns: 1fr !important; }
-
-  /* Buttons */
-  .btn { min-height: 44px; }
-
-  /* Nav items */
-  .nav-item { padding: 13px 16px; min-height: 48px; }
-
-  /* Prevent iOS zoom on input focus */
-  input, select, textarea { font-size: 16px !important; }
-
-  /* Page title */
-  .page-title { font-size: 1.25rem; }
-
-  /* Header actions */
-  .header-actions { display: none; }
-}
-
-@media (max-width: 480px) {
-  .page-content { padding: 10px 8px; }
-  .sidebar { width: 260px; }
 }
