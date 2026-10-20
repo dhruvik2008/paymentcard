@@ -224,7 +224,8 @@
       const { c, netCollect, totRecv, totPay, chargesRecv, chargesPay, ledgerRecv, ledgerPay, billsRecv, billsPay, pendingToCard } = data;
       const initials = (c.name || 'U').substring(0, 2).toUpperCase();
       const card = document.createElement('div');
-      card.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; overflow: hidden; display: flex; flex-direction: column;';
+      card.className = 'cb-customer-card';
+      card.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; overflow: hidden; display: flex; flex-direction: column; width: 100%; box-sizing: border-box;';
       card.innerHTML = `
         <div style="padding: 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 12px;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; color: #166534; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
