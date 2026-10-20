@@ -685,6 +685,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.closeMobileSidebar = closeMobileSidebar;
+    window.toggleMobileSidebar = toggleMobileSidebar;
+
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
@@ -693,12 +696,107 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarOverlay) {
         sidebarOverlay.addEventListener('click', closeMobileSidebar);
     }
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    if (sidebarCloseBtn) {
+        sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+    }
+
+    // Navigation History Stack for Mobile Back Button
+    window.navHistory = ['dashboardSection'];
+
+    const updateBackBtnVisibility = (currentSectionId) => {
+        const appBackBtn = document.getElementById('appBackBtn');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        if (!appBackBtn) return;
+        if (currentSectionId === 'dashboardSection') {
+            appBackBtn.style.display = 'none';
+            if (mobileMenuBtn) mobileMenuBtn.style.display = '';
+        } else {
+            appBackBtn.style.display = 'inline-flex';
+        }
+    };
+
+    window.navGoTo = (sectionId, breadcrumbTitle, skipHistory = false) => {
+        const sectionEl = document.getElementById(sectionId);
+        if (!sectionEl) return;
+
+        if (!skipHistory) {
+            if (window.navHistory[window.navHistory.length - 1] !== sectionId) {
+                window.navHistory.push(sectionId);
+            }
+        }
+
+        // Update Bottom Nav active state
+        document.querySelectorAll('.bnav-item').forEach(btn => btn.classList.remove('active'));
+        if (sectionId === 'dashboardSection') {
+            const b = document.getElementById('bnavDashboard');
+            if (b) b.classList.add('active');
+        } else if (sectionId === 'customersSection') {
+            const b = document.getElementById('bnavCustomers');
+            if (b) b.classList.add('active');
+        } else if (sectionId === 'allTransactionsSection' || sectionId === 'transactionsSection') {
+            const b = document.getElementById('bnavTransactions');
+            if (b) b.classList.add('active');
+        } else if (sectionId === 'customerBalancesSection') {
+            const b = document.getElementById('bnavBalances');
+            if (b) b.classList.add('active');
+        }
+
+        // Update Sidebar active state
+        document.querySelectorAll('.sidebar .nav-item').forEach(el => el.classList.remove('active'));
+        if (breadcrumbTitle) {
+            const bc = document.getElementById('breadcrumbCurrent');
+            if (bc) bc.textContent = breadcrumbTitle;
+        }
+
+        // Call relevant render functions
+        if (sectionId === 'dashboardSection' && typeof renderDashboard === 'function') renderDashboard();
+        if (sectionId === 'customersSection' && typeof renderCustomers === 'function') renderCustomers();
+        if (sectionId === 'allTransactionsSection' && typeof renderAllTransactions === 'function') renderAllTransactions();
+        if (sectionId === 'customerBalancesSection' && typeof renderCustomerBalancesReport === 'function') renderCustomerBalancesReport();
+
+        showSection(sectionEl);
+        updateBackBtnVisibility(sectionId);
+    };
+
+    window.navigateBack = () => {
+        // If drawer or wizard modal open, close it first
+        const activeDrawer = document.querySelector('.drawer.active');
+        if (activeDrawer) {
+            if (typeof closeDrawer === 'function') closeDrawer();
+            return;
+        }
+        const wizard = document.getElementById('wizardModal');
+        if (wizard && wizard.classList.contains('active')) {
+            wizard.classList.remove('active');
+            return;
+        }
+
+        if (window.navHistory.length > 1) {
+            window.navHistory.pop(); // remove current section
+            const prevSectionId = window.navHistory[window.navHistory.length - 1];
+            let title = 'Dashboard';
+            if (prevSectionId === 'customersSection') title = 'Customers';
+            else if (prevSectionId === 'allTransactionsSection') title = 'All Transactions';
+            else if (prevSectionId === 'customerBalancesSection') title = 'Customer Balances';
+            else if (prevSectionId === 'expensesSection') title = 'Expenses';
+            else if (prevSectionId === 'udharSection') title = 'Accounts Receivable';
+            else if (prevSectionId === 'extraProfitSection') title = 'Extra Profit';
+            else if (prevSectionId === 'allCardsSection') title = 'Credit Cards';
+            else if (prevSectionId === 'netProfitReportSection') title = 'Net Profit Report';
+
+            window.navGoTo(prevSectionId, title, true);
+        } else {
+            window.navGoTo('dashboardSection', 'Dashboard', true);
+        }
+    };
 
     // Helper: hide all page sections, then show the requested one as flex
     const showSection = (sectionEl) => {
         closeMobileSidebar();
         document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
         sectionEl.style.display = 'flex';
+        updateBackBtnVisibility(sectionEl.id);
     };
 
     // Handle submenu toggle
