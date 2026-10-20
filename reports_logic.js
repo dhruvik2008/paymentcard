@@ -203,7 +203,7 @@
       
       const totRecv = chargesRecv + ledgerRecv + billsRecv;
       const totPay = chargesPay + ledgerPay + billsPay;
-      const netCollect = totRecv - totPay;
+      const netCollect = (totRecv - totPay) + pendingToCard;
 
       // Skip fully settled customers
       if (Math.abs(netCollect) < 0.01) return;
