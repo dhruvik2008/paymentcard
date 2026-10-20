@@ -1,50 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ==============================
-    // Mobile Sidebar Toggle Logic
-    // ==============================
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const mainSidebar = document.getElementById('mainSidebar');
-    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-    const sidebarCloseMobile = document.getElementById('sidebarCloseMobile');
-
-    function openMobileSidebar() {
-        if (!mainSidebar) return;
-        mainSidebar.classList.add('mobile-open');
-        sidebarBackdrop && sidebarBackdrop.classList.add('active');
-        hamburgerBtn && hamburgerBtn.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeMobileSidebar() {
-        if (!mainSidebar) return;
-        mainSidebar.classList.remove('mobile-open');
-        sidebarBackdrop && sidebarBackdrop.classList.remove('active');
-        hamburgerBtn && hamburgerBtn.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', () => {
-            if (mainSidebar.classList.contains('mobile-open')) closeMobileSidebar();
-            else openMobileSidebar();
-        });
-    }
-    if (sidebarBackdrop) {
-        sidebarBackdrop.addEventListener('click', closeMobileSidebar);
-    }
-    if (sidebarCloseMobile) {
-        sidebarCloseMobile.addEventListener('click', closeMobileSidebar);
-    }
-
-    // Auto-close sidebar on nav item click (mobile)
-    if (mainSidebar) {
-        mainSidebar.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) closeMobileSidebar();
-            });
-        });
-    }
-
     // Pagination Global State
     let currentTxPage = 1;
     let currentAllTxPage = 1;
@@ -52,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentExtraProfitPage = 1;
     let currentUdharPage = 1;
     const ITEMS_PER_PAGE = 20;
-
 
     const loggedInEmail = localStorage.getItem('cardbills_logged_in_user_email') || 'User';
     const welcomeHeader = document.getElementById('welcomeUserHeader');
@@ -712,8 +665,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const portalBalancesSection = document.getElementById('portalBalancesSection');
     const transactionsSubmenu = document.getElementById('transactionsSubmenu');
 
+    // Mobile Sidebar Navigation Helpers
+    const closeMobileSidebar = () => {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+    };
+
+    const toggleMobileSidebar = () => {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) {
+            const isOpen = sidebar.classList.toggle('mobile-open');
+            if (overlay) {
+                if (isOpen) overlay.classList.add('active');
+                else overlay.classList.remove('active');
+            }
+        }
+    };
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+    }
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+
     // Helper: hide all page sections, then show the requested one as flex
     const showSection = (sectionEl) => {
+        closeMobileSidebar();
         document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
         sectionEl.style.display = 'flex';
     };
