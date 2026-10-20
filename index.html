@@ -4,8 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Maniya Enterprise">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Maniya Enterprise - Business Management</title>
   <link rel="icon"
@@ -484,12 +486,9 @@
     })();
   </script>
 
-  <!-- Mobile Sidebar Backdrop -->
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-
   <div class="app-container">
     <!-- Sidebar -->
-    <aside class="sidebar" id="mainSidebar">
+    <aside class="sidebar">
       <div class="sidebar-logo">
         <svg viewBox="0 0 100 100" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg"
           style="margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
@@ -519,7 +518,6 @@
         <span
           style="font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MANIYA
           ENTERPRISE</span>
-        <button class="sidebar-close-mobile" id="sidebarCloseMobile" aria-label="Close menu">✕</button>
       </div>
 
       <nav class="sidebar-nav">
@@ -685,30 +683,24 @@
         </a>
       </nav>
     </aside>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <!-- Main Content -->
     <main class="main-content">
       <header class="top-header">
-        <div class="mobile-header-left">
-          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </button>
-          <div class="mobile-brand-logo">
-            <svg viewBox="0 0 100 100" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="mobileGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#AA771C" />
-                  <stop offset="100%" stop-color="#BF953F" />
-                </linearGradient>
-              </defs>
-              <text x="5" y="72" font-family="Georgia,serif" font-weight="900" font-size="75" fill="url(#mobileGold)">M</text>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Open Navigation Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="22" height="22">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
-            <span class="mobile-brand-name">MANIYA</span>
+          </button>
+          <div class="breadcrumbs" id="breadcrumbs">
+            <span>Home</span> / <span>Apps</span> / <span class="current" id="breadcrumbCurrent">Customers</span>
           </div>
         </div>
-        <div class="breadcrumbs" id="breadcrumbs">
-          <span class="current" id="breadcrumbCurrent">Dashboard</span>
-        </div>
+
       </header>
 
       <!-- Customers Section -->
@@ -759,7 +751,7 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;">
+            <div class="dashboard-fin-grid">
               <div class="stat-card dash-card" style="text-align: center; border-bottom: 4px solid #166534;">
                 <h3 id="dbNetProfit" style="margin: 0 0 6px 0; font-size: 1.8rem; font-weight: 800; color: #166534;">
                   ₹0.00</h3>
@@ -789,7 +781,7 @@
           </div>
 
           <!-- Status metrics grid -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+          <div class="dashboard-status-grid">
             <div class="stat-card dash-card" style="display: flex; align-items: center; gap: 16px;">
               <div style="text-align: left;">
                 <p style="margin: 0 0 4px 0; font-size: 0.8rem; color: #6b7280; font-weight: 500;">Due Today</p>
@@ -823,7 +815,7 @@
           </div>
 
           <!-- Weekly Chart + Brand Chart + Schedule grid -->
-          <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;">
+          <div class="dashboard-charts-grid">
             <!-- Weekly Chart Panel -->
             <div
               style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 16px;">
@@ -842,7 +834,7 @@
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: center;">
+              <div class="dashboard-chart-inner-grid">
                 <div style="height: 250px; position: relative;">
                   <canvas id="dashboardWeeklyChartCanvas"></canvas>
                 </div>
@@ -2134,7 +2126,7 @@
           </div>
 
           <!-- Summary Cards -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
+          <div class="cb-summary-grid" style="margin-bottom: 24px;">
             <!-- Charges Pending -->
             <div
               style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;">
@@ -2187,7 +2179,7 @@
           </div>
 
           <!-- Customer Cards Grid -->
-          <div id="cbGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+          <div id="cbGrid" class="cb-cards-grid">
             <!-- Cards injected dynamically -->
           </div>
         </div>
