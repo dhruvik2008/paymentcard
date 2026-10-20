@@ -1007,17 +1007,17 @@
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <input type="text" id="transactionSearchInput" placeholder="Search bills, customers, cards..."
-                class="search-input" style="width: 400px;">
+                class="search-input" style="width: 100%; max-width: 400px;">
             </div>
-            <div style="display: flex; gap: 12px;">
+            <div class="search-actions-group" style="display: flex; gap: 12px;">
               <select id="transactionStatusFilter" class="custom-select"
-                style="min-width: 150px; background-color: #f9fafb; border-color: #d1d5db;">
+                style="min-width: 140px; background-color: #f9fafb; border-color: #d1d5db;">
                 <option value="All Status">All Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Fully Debited">Fully Debited</option>
               </select>
               <button class="btn btn-primary" id="createEntryBtn"
-                style="background-color: #6366f1; border-color: #6366f1;">
+                style="background-color: #6366f1; border-color: #6366f1; white-space: nowrap;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -4548,7 +4548,7 @@
       <span>Customers</span>
     </button>
 
-    <button class="bnav-item" id="bnavTransactions" type="button" onclick="window.navGoTo('allTransactionsSection', 'All Transactions')">
+    <button class="bnav-item" id="bnavTransactions" type="button" onclick="window.navGoTo('transactionsSection', 'Transaction Bills')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
         <circle cx="12" cy="12" r="10"></circle>
         <polyline points="12 6 12 12 16 14"></polyline>
