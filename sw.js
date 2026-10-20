@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maniya-enterprise-v3';
+const CACHE_NAME = 'maniya-enterprise-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,9 @@ const ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './favicon-32.png',
+  './favicon-64.png'
 ];
 
 self.addEventListener('install', e => {
