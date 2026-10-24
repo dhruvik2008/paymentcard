@@ -311,21 +311,26 @@
     let billsPay = 0;
     let chargesRecv = 0;
     let chargesPay = 0;
+    let pendingToCard = 0;
     let pendingTxs = [];
     
     txs.forEach((t, i) => {
       if (t.raw && (t.customerName || '').toLowerCase() === customerName.toLowerCase()) {
-        billsRecv += parseFloat(t.raw.billTotal) || 0;
+        let txBill = parseFloat(t.raw.billTotal) || 0;
+        billsRecv += txBill;
         let txPay = 0;
         if (t.raw.payments) {
           t.raw.payments.forEach(p => txPay += parseFloat(p.amount) || 0);
         }
         billsPay += txPay;
         
+        let txDebit = 0;
         let txCharge = 0;
         if (t.raw.debits) {
           t.raw.debits.forEach(d => {
-             let cFee = parseFloat(d.charges) || ((parseFloat(d.amount) || 0) * (parseFloat(d.ratePercent) || 0) / 100);
+             let amt = parseFloat(d.amount) || 0;
+             txDebit += amt;
+             let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
              txCharge += cFee;
              let status = (d.chargesStatus || '').toLowerCase();
              let dPaid = parseFloat(d.paidAmount) || 0;
@@ -338,7 +343,9 @@
         }
         chargesRecv += txCharge;
         
-        let oweOnBill = Math.max(0, (parseFloat(t.raw.billTotal) || 0) - txPay);
+        pendingToCard += Math.max(0, txBill - txPay) + Math.max(0, txPay - txDebit);
+
+        let oweOnBill = Math.max(0, txBill - txPay);
         if (oweOnBill > 0) {
           pendingTxs.push({index: i, tx: t, owe: oweOnBill});
         }
@@ -357,13 +364,48 @@
       }
     });
     
+    let currentCharges = chargesRecv - chargesPay;
+    let currentBills = billsRecv - billsPay;
     let ledgerNet = ledgerRecv - ledgerPay;
-    if (ledgerNet > 0) { ledgerRecv = ledgerNet; ledgerPay = 0; }
-    else { ledgerPay = Math.abs(ledgerNet); ledgerRecv = 0; }
+
+    // Auto-offset negative bills against positive charges
+    if (currentBills < 0 && currentCharges > 0) {
+       let deduct = Math.min(currentCharges, Math.abs(currentBills));
+       currentCharges -= deduct;
+       currentBills += deduct;
+       chargesPay += deduct;
+       billsPay += deduct;
+    }
+
+    // Auto-offset overpayments (negative ledger) against pending charges and bills
+    if (ledgerNet < 0) {
+      let available = Math.abs(ledgerNet);
+      if (currentCharges > 0) {
+         let deduct = Math.min(currentCharges, available);
+         currentCharges -= deduct;
+         available -= deduct;
+         chargesPay += deduct;
+         ledgerPay -= deduct;
+      }
+      if (currentBills > 0 && available > 0) {
+         let deduct = Math.min(currentBills, available);
+         currentBills -= deduct;
+         available -= deduct;
+         billsPay += deduct;
+         ledgerPay -= deduct;
+      }
+      ledgerNet = -available;
+    }
+
+    if (ledgerNet > 0) {
+      ledgerRecv = ledgerNet; ledgerPay = 0;
+    } else {
+      ledgerPay = Math.abs(ledgerNet); ledgerRecv = 0;
+    }
     
     const totRecv = chargesRecv + ledgerRecv + billsRecv;
     const totPay = chargesPay + ledgerPay + billsPay;
-    const netCollect = totRecv - totPay;
+    const netCollect = (totRecv - totPay) + pendingToCard;
     
     if (type === 'receive') {
        if (netCollect <= 0) {
@@ -679,22 +721,29 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
   let chargesPay = 0;
   let billsRecv = 0;
   let billsPay = 0;
+  let pendingToCard = 0;
   
   txs.forEach(t => {
     if (!t.raw) return;
     if ((t.customerName || '').toLowerCase() !== customerName.toLowerCase()) return;
     
-    billsRecv += parseFloat(t.raw.billTotal) || 0;
+    let txBill = parseFloat(t.raw.billTotal) || 0;
+    billsRecv += txBill;
     
+    let txPaid = 0;
     if (t.raw.payments) {
       t.raw.payments.forEach(p => {
-         billsPay += parseFloat(p.amount) || 0;
+         let pAmt = parseFloat(p.amount) || 0;
+         billsPay += pAmt;
+         txPaid += pAmt;
       });
     }
     
+    let txDebit = 0;
     if (t.raw.debits) {
       t.raw.debits.forEach(d => {
         let amt = parseFloat(d.amount) || 0;
+        txDebit += amt;
         let cFee = parseFloat(d.charges) || (amt * (parseFloat(d.ratePercent) || 0) / 100);
         chargesRecv += cFee; 
         
@@ -707,6 +756,8 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
         }
       });
     }
+
+    pendingToCard += Math.max(0, txBill - txPaid) + Math.max(0, txPaid - txDebit);
   });
   
   let ledgerRecv = 0;
@@ -724,7 +775,39 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
     }
   });
   
+  let currentCharges = chargesRecv - chargesPay;
+  let currentBills = billsRecv - billsPay;
   let ledgerNet = ledgerRecv - ledgerPay;
+
+  // Auto-offset negative bills against positive charges
+  if (currentBills < 0 && currentCharges > 0) {
+     let deduct = Math.min(currentCharges, Math.abs(currentBills));
+     currentCharges -= deduct;
+     currentBills += deduct;
+     chargesPay += deduct;
+     billsPay += deduct;
+  }
+
+  // Auto-offset overpayments (negative ledger) against pending charges and bills
+  if (ledgerNet < 0) {
+    let available = Math.abs(ledgerNet);
+    if (currentCharges > 0) {
+       let deduct = Math.min(currentCharges, available);
+       currentCharges -= deduct;
+       available -= deduct;
+       chargesPay += deduct;
+       ledgerPay -= deduct;
+    }
+    if (currentBills > 0 && available > 0) {
+       let deduct = Math.min(currentBills, available);
+       currentBills -= deduct;
+       available -= deduct;
+       billsPay += deduct;
+       ledgerPay -= deduct;
+    }
+    ledgerNet = -available;
+  }
+
   if (ledgerNet > 0) {
     ledgerRecv = ledgerNet; ledgerPay = 0;
   } else {
@@ -733,7 +816,7 @@ window.openCustomerBalanceView = (customerName, customerPhone) => {
   
   const totRecv = chargesRecv + ledgerRecv + billsRecv;
   const totPay = chargesPay + ledgerPay + billsPay;
-  const netCollect = totRecv - totPay;
+  const netCollect = (totRecv - totPay) + pendingToCard;
   
   document.getElementById('cbModalCharges').textContent = '₹' + chargesRecv.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('cbModalLedger').textContent = '₹' + ledgerRecv.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
